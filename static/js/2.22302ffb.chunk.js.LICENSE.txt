@@ -4,6 +4,14 @@ object-assign
 @license MIT
 */
 
+/**
+  stickybits - Stickybits is a lightweight alternative to `position: sticky` polyfills
+  @version v3.7.7
+  @link https://github.com/yowainwright/stickybits#readme
+  @author Jeff Wainwright <yowainwright@gmail.com> (https://jeffry.in)
+  @license MIT
+**/
+
 /** @license React v0.19.1
  * scheduler.production.min.js
  *
