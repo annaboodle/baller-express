@@ -52,15 +52,15 @@ form {
     margin: 20px auto 0;
     transition: 0.3s opacity;
     -webkit-appearance: none;
-    // border-radius: 0;
-
     &:hover {
       opacity: 0.9;
     }
   }
 
   .submit-label {
-    white-space: nowrap;
+    @media (max-width: $break-mobile) {
+      display: block;
+    }
   }
 
   .submit-data {
@@ -69,6 +69,7 @@ form {
     padding: 5px 10px;
     border-radius: 5px;
     font-weight: bold;
+    display: inline-block;
 
     @media (max-width: $break-mobile) {
       margin-left: 0;
@@ -105,7 +106,6 @@ form {
   }
 
   .form-field--checkbox-date {
-    // flex-grow: 1;
     padding-left: 20px !important;
     padding-bottom: 22px !important;
     @media (max-width: $break-mobile) {
@@ -130,9 +130,7 @@ form {
   display: block;
   position: relative;
   padding-left: 35px;
-  // margin-bottom: 12px;
   cursor: pointer;
-  // font-size: 22px;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -323,5 +321,14 @@ form {
 
   .slider.round:before {
     border-radius: 50%;
+  }
+}
+
+.modal--edit {
+  .checkbox-container .checkmark {
+    top: 3px;
+    @media (max-width: $break-mobile) {
+      top: 0;
+    }
   }
 }

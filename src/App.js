@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Tabletop from "tabletop";
 import uid from "uid";
+import stickybits from "stickybits";
 
 import AddCommentIcon from "./components/icons/AddCommentIcon.js";
 
@@ -106,6 +107,9 @@ function App() {
   const [addEventDesc, updateAddEventDesc] = useState("");
   const [addEventCheckboxesData, updateAddEventCheckboxesData] = useState([]); // an array of objects representing checkboxes of people
   const [addEventOtherPeople, updateAddEventOtherPeople] = useState(""); // "Anyone else?"
+
+  // stick the years on scroll
+  stickybits(".year-wrap", { useStickyClasses: true });
 
   // runs once on page load:
   useEffect(() => {
@@ -344,13 +348,14 @@ function App() {
       });
 
       return (
-        <div key={index}>
+        <>
           {showYear && (
             <div className="year-wrap" id={formatDate(date, precise)[1]}>
               <div className="year">{formatDate(date, precise)[1]}</div>
             </div>
           )}
           <div
+            key={index}
             className={`item type--${type} size--${size || "m"}
           ${hideThisItem ? "hide" : ""} `}
           >
@@ -380,7 +385,7 @@ function App() {
               </div>
             </div>
           </div>
-        </div>
+        </>
       );
     }
   );

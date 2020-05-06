@@ -28,12 +28,14 @@ export default function SubmitEditForm({
     >
       <h2 className="form-title">Submit edits to this milestone</h2>
 
-      <div className="form-field--checkbox-wrap">
+      <div className="form-field form-field--checkbox-wrap">
         <p className="form-label">What needs to be edited?</p>
         <div className="form-field form-field--checkbox form-field--checkbox-full">
           <label className="checkbox-container">
-            <span className="submit-label">The date of the milestone: </span>
-            <span className="submit-data">{milestoneDateToSubmit}</span>
+            <div className="submit-wrap">
+              <span className="submit-label">The date of the milestone: </span>
+              <span className="submit-data">{milestoneDateToSubmit}</span>
+            </div>
             <input
               name="entry.1414516352"
               type="checkbox"
@@ -48,8 +50,10 @@ export default function SubmitEditForm({
         </div>
         <div className="form-field form-field--checkbox form-field--checkbox-full">
           <label className="checkbox-container">
-            <span className="submit-label">The people involved: </span>
-            <span className="submit-data">{milestonePeopleToSubmit}</span>
+            <div className="submit-wrap">
+              <span className="submit-label">The people involved: </span>
+              <span className="submit-data">{milestonePeopleToSubmit}</span>
+            </div>
             <input
               name="entry.1414516352"
               type="checkbox"
@@ -64,8 +68,10 @@ export default function SubmitEditForm({
         </div>
         <div className="form-field form-field--checkbox form-field--checkbox-full">
           <label className="checkbox-container">
-            <span className="submit-label">The description: </span>
-            <span className="submit-data">{milestoneDescToSubmit}</span>
+            <div className="submit-wrap">
+              <span className="submit-label">The description: </span>
+              <span className="submit-data">{milestoneDescToSubmit}</span>
+            </div>
             <input
               name="entry.1414516352"
               type="checkbox"
