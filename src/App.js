@@ -561,20 +561,20 @@ function App() {
               Filter the timeline
             </a>
             <a
-              href="https://photos.app.goo.gl/dEVzY9gZQb4pjsfM9"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn"
-            >
-              Upload your photos
-            </a>
-            <a
               className="btn"
               onClick={() => {
                 updateAddModalOpen(true);
               }}
             >
               Add a milestone
+            </a>
+            <a
+              href="https://photos.app.goo.gl/dEVzY9gZQb4pjsfM9"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn"
+            >
+              Upload your photos
             </a>
           </div>
         </div>

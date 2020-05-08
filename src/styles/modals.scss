@@ -4,7 +4,6 @@
   display: none;
 
   &.modal-open {
-    z-index: 100;
     display: block;
 
     .modal-bg {
@@ -50,6 +49,7 @@
       background: #fff;
       padding: 40px;
       position: fixed;
+      z-index: 100;
       max-height: 80vh;
       width: 80vw;
       top: 10vh;
