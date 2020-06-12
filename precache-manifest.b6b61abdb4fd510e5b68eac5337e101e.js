@@ -1,23 +1,23 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "b64293448faca9b02cebfa160c2e95b4",
+    "revision": "f11648765d958961e9e2c668bafcf435",
     "url": "/baller-express/index.html"
   },
   {
-    "revision": "e2eb8ee1c59993db0e15",
+    "revision": "9a24c8417bdb49824d42",
     "url": "/baller-express/static/css/main.de6b8bd9.chunk.css"
   },
   {
-    "revision": "4a4e6f4ac6081a19b67e",
-    "url": "/baller-express/static/js/2.22302ffb.chunk.js"
+    "revision": "7ed3ed4745f648e06a65",
+    "url": "/baller-express/static/js/2.7e978beb.chunk.js"
   },
   {
-    "revision": "4f0ceb7dbb3f93120c1e71166761ae7e",
-    "url": "/baller-express/static/js/2.22302ffb.chunk.js.LICENSE.txt"
+    "revision": "1a1b548bb8c56c6184303127273b7143",
+    "url": "/baller-express/static/js/2.7e978beb.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "e2eb8ee1c59993db0e15",
-    "url": "/baller-express/static/js/main.9f652ab8.chunk.js"
+    "revision": "9a24c8417bdb49824d42",
+    "url": "/baller-express/static/js/main.c10d29a0.chunk.js"
   },
   {
     "revision": "74330397d93e0039971b",
