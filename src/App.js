@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Tabletop from "tabletop";
+import Papa from "papaparse";
 import uid from "uid";
 import stickybits from "stickybits";
 
@@ -163,27 +163,43 @@ function App() {
       return [formattedDate];
     }
 
-    Tabletop.init({
-      key: "1v96fpa9peEx2LLEnto3FeagSkWOmsCM8JlRKoa1HDpE", // starter spreadsheet
-      callback: (dataFromSheet1) => {
-        Tabletop({
-          key: "1DFao95ZdEZLDeHEX8LxY4FsRN5q4cqBDiGZYTKYDObc", // form responses
-          callback: (dataFromSheet2) => {
-            const filteredResponses = dataFromSheet2.filter((milestone) => {
-              return milestone.hide !== "Y"; // filter out responses we want to hide
-            });
-            let dataFromBothSheets = dataFromSheet1.concat(filteredResponses);
-            let sortedData = dataFromBothSheets.sort((a, b) =>
-              formatDateForSort(a.date) > formatDateForSort(b.date) ? 1 : -1
-            ); // sort by date
-            updateData(sortedData);
-            createFilters(sortedData);
-          },
-          simpleSheet: true,
-        });
-      },
-      simpleSheet: true,
+    const MASTER_SHEET =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSQVovaTHIAN1669rUYinPqb3VfZIGBvpgiqKkNNW44Zkl2ZHhx-MdVCsD6CHDVUnmcc__UDNR5LBrt/pub?output=csv";
+
+    const SUBMITTED_MILESTONES =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQYc1XgbSvLbZZwd-ta4Nm0hJ3K75-FpOIBkk8n01mUDZXiXw3cAeZ91i5heLWKowOjnSEk9PZioAb8/pub?output=csv";
+
+    let MASTER_SHEET_DATA = [];
+
+    Papa.parse(MASTER_SHEET, {
+      download: true,
+      header: true,
+      complete: saveAndGetSubmittedResponses,
     });
+
+    function saveAndGetSubmittedResponses(masterSheetData) {
+      MASTER_SHEET_DATA = masterSheetData.data;
+
+      Papa.parse(SUBMITTED_MILESTONES, {
+        download: true,
+        header: true,
+        complete: finishSetup,
+      });
+    }
+
+    function finishSetup(submittedResponsesData) {
+      const FILTERED_RESPONSES = submittedResponsesData.data.filter(
+        (milestone) => {
+          return milestone.hide !== "Y"; // filter out responses we want to hide
+        }
+      );
+      let dataFromBothSheets = MASTER_SHEET_DATA.concat(FILTERED_RESPONSES);
+      let sortedData = dataFromBothSheets.sort((a, b) =>
+        formatDateForSort(a.date) > formatDateForSort(b.date) ? 1 : -1
+      ); // sort by date
+      updateData(sortedData);
+      createFilters(sortedData);
+    }
   }, []);
 
   function formatDate(dateString, precise) {
