@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Papa from "papaparse";
+import Tabletop from "tabletop";
 import uid from "uid";
 import stickybits from "stickybits";
 
@@ -163,43 +164,83 @@ function App() {
       return [formattedDate];
     }
 
-    const MASTER_SHEET =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSQVovaTHIAN1669rUYinPqb3VfZIGBvpgiqKkNNW44Zkl2ZHhx-MdVCsD6CHDVUnmcc__UDNR5LBrt/pub?output=csv";
+    /* FOLLOWING CODE IS FOR PAPAPARSE. TBA ON WHETHER THIS WILL WORK */
 
-    const SUBMITTED_MILESTONES =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQYc1XgbSvLbZZwd-ta4Nm0hJ3K75-FpOIBkk8n01mUDZXiXw3cAeZ91i5heLWKowOjnSEk9PZioAb8/pub?output=csv";
+    // const MASTER_SHEET =
+    //   "https://docs.google.com/spreadsheets/d/e/2PACX-1vSQVovaTHIAN1669rUYinPqb3VfZIGBvpgiqKkNNW44Zkl2ZHhx-MdVCsD6CHDVUnmcc__UDNR5LBrt/pub?output=csv";
 
-    let MASTER_SHEET_DATA = [];
+    // const SUBMITTED_MILESTONES =
+    //   "https://docs.google.com/spreadsheets/d/e/2PACX-1vQYc1XgbSvLbZZwd-ta4Nm0hJ3K75-FpOIBkk8n01mUDZXiXw3cAeZ91i5heLWKowOjnSEk9PZioAb8/pub?output=csv";
 
-    Papa.parse(MASTER_SHEET, {
-      download: true,
-      header: true,
-      complete: saveAndGetSubmittedResponses,
-    });
+    // let MASTER_SHEET_DATA = [];
 
-    function saveAndGetSubmittedResponses(masterSheetData) {
-      MASTER_SHEET_DATA = masterSheetData.data;
+    // Papa.parse(MASTER_SHEET, {
+    //   download: true,
+    //   header: true,
+    //   complete: saveAndGetSubmittedResponses,
+    // });
 
-      Papa.parse(SUBMITTED_MILESTONES, {
-        download: true,
-        header: true,
-        complete: finishSetup,
+    // function saveAndGetSubmittedResponses(masterSheetData) {
+    //   MASTER_SHEET_DATA = masterSheetData.data;
+
+    //   Papa.parse(SUBMITTED_MILESTONES, {
+    //     download: true,
+    //     header: true,
+    //     complete: finishSetup,
+    //   });
+    // }
+
+    // function finishSetup(submittedResponsesData) {
+    //   const FILTERED_RESPONSES = submittedResponsesData.data.filter(
+    //     (milestone) => {
+    //       return milestone.hide !== "Y"; // filter out responses we want to hide
+    //     }
+    //   );
+    //   let dataFromBothSheets = MASTER_SHEET_DATA.concat(FILTERED_RESPONSES);
+    //   let sortedData = dataFromBothSheets.sort((a, b) =>
+    //     formatDateForSort(a.date) > formatDateForSort(b.date) ? 1 : -1
+    //   ); // sort by date
+    //   updateData(sortedData);
+    //   createFilters(sortedData);
+    // }
+
+    function finishSetup(mainTimeline, submittedResponses) {
+      const FILTERED_RESPONSES = submittedResponses.filter((milestone) => {
+        return milestone.hide !== "Y"; // filter out responses we want to hide
       });
-    }
-
-    function finishSetup(submittedResponsesData) {
-      const FILTERED_RESPONSES = submittedResponsesData.data.filter(
-        (milestone) => {
-          return milestone.hide !== "Y"; // filter out responses we want to hide
-        }
-      );
-      let dataFromBothSheets = MASTER_SHEET_DATA.concat(FILTERED_RESPONSES);
+      let dataFromBothSheets = mainTimeline.concat(FILTERED_RESPONSES);
       let sortedData = dataFromBothSheets.sort((a, b) =>
         formatDateForSort(a.date) > formatDateForSort(b.date) ? 1 : -1
       ); // sort by date
       updateData(sortedData);
       createFilters(sortedData);
     }
+
+    const mainTimelineData =
+      "https://docs.google.com/spreadsheets/d/1v96fpa9peEx2LLEnto3FeagSkWOmsCM8JlRKoa1HDpE/pubhtml";
+
+    const submittedResponseData =
+      "https://docs.google.com/spreadsheets/d/1DFao95ZdEZLDeHEX8LxY4FsRN5q4cqBDiGZYTKYDObc/pubhtml";
+
+    let mainTimeline = [];
+
+    const setup = () => {
+      Tabletop.init({
+        key: mainTimelineData,
+        callback: function (data, tabletop) {
+          mainTimeline = data;
+          Tabletop.init({
+            key: submittedResponseData,
+            callback: (data) => {
+              finishSetup(mainTimeline, data);
+            },
+            simpleSheet: true,
+          });
+        },
+        simpleSheet: true,
+      });
+    };
+    setup();
   }, []);
 
   function formatDate(dateString, precise) {
