@@ -82,7 +82,7 @@ function App() {
     useStickyClasses: true,
     stickyBitStickyOffset: 70,
   });
-  stickybits(".title-wrap", { useStickyClasses: true });
+  stickybits(".header", { useStickyClasses: true });
 
   // runs once on page load:
   useEffect(() => {
@@ -425,17 +425,19 @@ function App() {
   return (
     <div className="App">
       <div className="timeline">
-        <div className="title-wrap">
-          <h1 className="title">
-            {/* <span className="mobile">🚂</span> */}
-            <span
+        <div className="header">
+          <div className="title-wrapper">
+            <div
               style={{
-                backgroundImage: `url(${BallerExpress})`, 
+                backgroundImage: `url(${BallerExpress})`,
               }}
               className="logo"
-            ></span>
-            <span className="text">The Baller Express</span>
-          </h1>
+            ></div>
+            <h1 className="title">
+              {/* <span className="mobile">🚂</span> */}
+              The Baller Express
+            </h1>
+          </div>
           <div className="btn-wrap">
             <a
               className="btn btn--orange"

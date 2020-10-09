@@ -24,7 +24,7 @@ body {
   }
 }
 
-.title-wrap {
+.header {
   padding: 10px 0 10px 20px;
   justify-content: center;
   align-items: flex-start;
@@ -40,13 +40,17 @@ body {
   }
 }
 
-.title {
+.title-wrapper {
   display: flex;
   align-items: center;
+  flex-grow: 1;
+}
+
+.title {
+  display: inline-block;
   font-size: 42px;
   margin: 0 0;
-  flex-grow: 1;
-  background: $gradient-1; //fallback if gradient doesn't work
+  background: $gradient-1; // fallback if gradient doesn't work
   background: -moz-linear-gradient(
     to right,
     $gradient-1,
@@ -88,24 +92,11 @@ body {
   -moz-text-fill-color: transparent;
   -ms-text-fill-color: transparent;
   -o-text-fill-color: transparent;
-  text-fill-color: transparent;
-
-  .logo {
-    display: none;
-    margin-right: 10px;
-  }
 
   @media (max-width: $break-mobile) {
     font-size: 15px;
     line-height: 1;
-
-    .text {
-      max-width: 60px;
-    }
-
-    .logo {
-      display: flex;
-    }
+    max-width: 60px;
   }
 }
 
@@ -119,6 +110,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-right: 10px;
+  display: none;
+  @media (max-width: $break-mobile) {
+    display: flex;
+  }
 }
 
 .btn-wrap {
