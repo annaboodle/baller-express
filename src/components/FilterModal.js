@@ -105,9 +105,10 @@ export default function FilterModal({
         >
           <CloseIcon />
         </div>
+        <h2 className="filter-title">Filter the timeline</h2>
         <div className="filter-block--type">
           <div className="filter-header">
-            <h2>Milestones</h2>
+            <h3>Milestones</h3>
             <p
               className="check-all"
               onClick={() => {
@@ -124,7 +125,7 @@ export default function FilterModal({
         <div className="filter-block--people">
           <div className="filter-header">
             <div>
-              <h2>People</h2>
+              <h3>People</h3>
               <p
                 className="check-all"
                 onClick={() => {

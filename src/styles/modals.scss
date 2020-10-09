@@ -80,11 +80,12 @@
 
     .modal-close {
       position: absolute;
-      top: 15px;
-      right: 25px;
+      top: 20px;
+      right: 20px;
       z-index: 3;
 
       @media (max-width: $break-mobile) {
+        top: 24px;
         position: fixed;
       }
 
@@ -101,6 +102,11 @@
         transition: 0.2s all;
         z-index: -1;
       }
+    }
+
+    .filter-title {
+      margin-top: 0;
+      margin-bottom: 5px;
     }
 
     .filter-header {
