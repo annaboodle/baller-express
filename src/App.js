@@ -15,6 +15,8 @@ import "./styles/index.scss";
 import { randomAvatarColors, monthNames } from "./utils";
 import { photoMap } from "./photoMap";
 
+import BallerExpress from "./img/baller-express.png";
+
 import FilterModal from "./components/FilterModal";
 
 import AddMilestoneForm from "./components/AddMilestoneForm.js";
@@ -425,8 +427,14 @@ function App() {
       <div className="timeline">
         <div className="title-wrap">
           <h1 className="title">
-            <span className="mobile">🚂</span>
-            <span className="desktop">The Baller Express</span>
+            {/* <span className="mobile">🚂</span> */}
+            <span
+              style={{
+                backgroundImage: `url(${BallerExpress})`, 
+              }}
+              className="logo"
+            ></span>
+            <span className="text">The Baller Express</span>
           </h1>
           <div className="btn-wrap">
             <a
