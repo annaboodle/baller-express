@@ -1,23 +1,23 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "f6aacb447609f9820faf0226143a3029",
+    "revision": "4aaed294bacb5e943ffca176adf44c69",
     "url": "/baller-express/index.html"
   },
   {
-    "revision": "b7bd8dbfdf9bccdae384",
-    "url": "/baller-express/static/css/main.de6b8bd9.chunk.css"
+    "revision": "3686f20cb2ec12c4440c",
+    "url": "/baller-express/static/css/main.b3fa4ccc.chunk.css"
   },
   {
-    "revision": "61ae1344b5a21b1519b2",
-    "url": "/baller-express/static/js/2.e91928e4.chunk.js"
+    "revision": "adc750f2a549cded274c",
+    "url": "/baller-express/static/js/2.b1c6f52e.chunk.js"
   },
   {
     "revision": "1a1b548bb8c56c6184303127273b7143",
-    "url": "/baller-express/static/js/2.e91928e4.chunk.js.LICENSE.txt"
+    "url": "/baller-express/static/js/2.b1c6f52e.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "b7bd8dbfdf9bccdae384",
-    "url": "/baller-express/static/js/main.6e9abfaf.chunk.js"
+    "revision": "3686f20cb2ec12c4440c",
+    "url": "/baller-express/static/js/main.f3a0539e.chunk.js"
   },
   {
     "revision": "74330397d93e0039971b",
@@ -142,6 +142,10 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
     "revision": "2f485ac500f443cef93d330d48e52950",
     "url": "/baller-express/static/media/Noah.2f485ac5.png"
+  },
+  {
+    "revision": "6afd8e1812403672e35ed2e1740c6aed",
+    "url": "/baller-express/static/media/PapaHoff.6afd8e18.JPG"
   },
   {
     "revision": "87af83e51147f46521b9bfa431fd0ac4",
