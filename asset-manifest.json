@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/baller-express/static/css/main.b3fa4ccc.chunk.css",
+    "main.css": "/baller-express/static/css/main.37ee00a3.chunk.css",
     "main.js": "/baller-express/static/js/main.f3a0539e.chunk.js",
     "main.js.map": "/baller-express/static/js/main.f3a0539e.chunk.js.map",
     "runtime-main.js": "/baller-express/static/js/runtime-main.91568d41.js",
@@ -8,9 +8,9 @@
     "static/js/2.b1c6f52e.chunk.js": "/baller-express/static/js/2.b1c6f52e.chunk.js",
     "static/js/2.b1c6f52e.chunk.js.map": "/baller-express/static/js/2.b1c6f52e.chunk.js.map",
     "index.html": "/baller-express/index.html",
-    "precache-manifest.31033d137bfa1cb6411bb2e0c222bcd0.js": "/baller-express/precache-manifest.31033d137bfa1cb6411bb2e0c222bcd0.js",
+    "precache-manifest.9816a17a66fe93ba86d52ff104bffc47.js": "/baller-express/precache-manifest.9816a17a66fe93ba86d52ff104bffc47.js",
     "service-worker.js": "/baller-express/service-worker.js",
-    "static/css/main.b3fa4ccc.chunk.css.map": "/baller-express/static/css/main.b3fa4ccc.chunk.css.map",
+    "static/css/main.37ee00a3.chunk.css.map": "/baller-express/static/css/main.37ee00a3.chunk.css.map",
     "static/js/2.b1c6f52e.chunk.js.LICENSE.txt": "/baller-express/static/js/2.b1c6f52e.chunk.js.LICENSE.txt",
     "static/media/Adi.png": "/baller-express/static/media/Adi.b6b2fe35.png",
     "static/media/Ana.png": "/baller-express/static/media/Ana.e1b41c50.png",
@@ -58,7 +58,7 @@
   "entrypoints": [
     "static/js/runtime-main.91568d41.js",
     "static/js/2.b1c6f52e.chunk.js",
-    "static/css/main.b3fa4ccc.chunk.css",
+    "static/css/main.37ee00a3.chunk.css",
     "static/js/main.f3a0539e.chunk.js"
   ]
 }
