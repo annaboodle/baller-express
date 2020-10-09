@@ -81,9 +81,14 @@ body {
   // https://fossheim.io/writing/posts/css-text-gradient/
   -webkit-background-clip: text;
   -moz-background-clip: text;
+  -ms-background-clip: text;
+  -o-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   -moz-text-fill-color: transparent;
+  -ms-text-fill-color: transparent;
+  -o-text-fill-color: transparent;
+  text-fill-color: transparent;
 
   .logo {
     display: none;
