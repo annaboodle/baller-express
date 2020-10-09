@@ -41,7 +41,7 @@ form {
 
   input[type="submit"] {
     border: none;
-    background: $edit-btn-bg;
+    background: $action-color-dark;
     font-size: 14px;
     font-weight: bold;
     text-transform: uppercase;
@@ -65,7 +65,7 @@ form {
 
   .submit-data {
     margin-left: 8px;
-    background: #e9f8fa;
+    background: $action-color-light;
     padding: 5px 10px;
     border-radius: 5px;
     font-weight: bold;
@@ -152,18 +152,18 @@ form {
     left: 0;
     height: 20px;
     width: 20px;
-    background-color: #eee;
+    background-color: $checkmark;
     border-radius: 50%;
   }
 
   /* On mouse-over, add a grey background color */
   &:hover input ~ .checkmark {
-    background-color: #ccc;
+    background-color: $checkmark-hover;
   }
 
   /* When the radio button is checked, add a blue background */
   input:checked ~ .checkmark {
-    background-color: #2196f3;
+    background-color: $action-color;
   }
 
   /* Create the indicator (the dot/circle - hidden when not checked) */
@@ -185,7 +185,7 @@ form {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: white;
+    background: #fff;
   }
 }
 
@@ -222,17 +222,17 @@ form {
     left: 0;
     height: 25px;
     width: 25px;
-    background-color: #eee;
+    background-color: $checkmark;
   }
 
   /* On mouse-over, add a grey background color */
   &:hover input ~ .checkmark {
-    background-color: #ccc;
+    background-color: $checkmark-hover;
   }
 
   /* When the checkbox is checked, add a blue background */
   input:checked ~ .checkmark {
-    background-color: $checkbox;
+    background-color: $action-color;
   }
 
   /* Create the checkmark/indicator (hidden when not checked) */
@@ -253,7 +253,7 @@ form {
     top: 5px;
     width: 5px;
     height: 10px;
-    border: solid white;
+    border: solid #fff;
     border-width: 0 3px 3px 0;
     -webkit-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
@@ -283,7 +283,7 @@ form {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: $slider-color;
     -webkit-transition: 0.4s;
     transition: 0.4s;
   }
@@ -295,17 +295,17 @@ form {
     width: 20px;
     left: 3px;
     bottom: 3px;
-    background-color: white;
+    background-color: #fff;
     -webkit-transition: 0.4s;
     transition: 0.4s;
   }
 
   input:checked + .slider {
-    background-color: #2196f3;
+    background-color: $action-color;
   }
 
   input:focus + .slider {
-    box-shadow: 0 0 1px #2196f3;
+    box-shadow: 0 0 1px $action-color;
   }
 
   input:checked + .slider:before {

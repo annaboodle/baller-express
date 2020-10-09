@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function AddCommentIcon({ fill = "#393939" }) {
+export default function AddIcon({ fill = "#393939" }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -10,7 +10,7 @@ export default function AddCommentIcon({ fill = "#393939" }) {
       height="24px"
     >
       <path d="M0 0h24v24H0V0z" fill="none" />
-      <path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18zM17 11h-4v4h-2v-4H7V9h4V5h2v4h4v2z" />
+      <path d="M18 13h-5v5c0 .55-.45 1-1 1s-1-.45-1-1v-5H6c-.55 0-1-.45-1-1s.45-1 1-1h5V6c0-.55.45-1 1-1s1 .45 1 1v5h5c.55 0 1 .45 1 1s-.45 1-1 1z" />
     </svg>
   );
 }

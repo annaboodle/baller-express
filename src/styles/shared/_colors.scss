@@ -1,14 +1,43 @@
+$dark-text: #393939;
+
+//tags for types of milestones
 $event: #d8fef6;
 $trip: #f6ebff;
 $move: #ffdeed;
 $intro: #ffedce;
 
-$checkbox: #2196f3;
+//colors for interactive items: buttons, checkboxes, links, etc
+$action-color: #9863ff;
+$action-color-dark: #7d51d2;
+$action-color-light: #fbeefd;
 
-$dark-text: #393939;
-
+//text that appears when hovering on photos
 $tooltip-bg: #f2f2f2;
 
-$edit-btn-bg: #13439a;
+//modal grayed-out background
+$overlay: #00000017;
+
+//form colors
 $form-field-border: gray;
-$form-field-border-focus: $edit-btn-bg;
+$checkmark: #eee;
+$checkmark-hover: #ccc;
+$slider-color: #ccc;
+$form-field-border-focus: $action-color-dark;
+
+//gradient colors for the title text
+$gradient-1: #d56be2;
+$gradient-2: #ffa83f;
+$gradient-3: #ff2c96;
+
+//button colors
+$btn-bg-purple: #fbbaff6b;
+$btn-icon-purple: #730373;
+
+$btn-bg-blue: #baefff6b;
+$btn-icon-blue: #031173;
+
+$btn-bg-orange: #ffd3ba6b;
+$btn-icon-orange: #ff5200;
+
+$btn-bg-green: #baffcf6b;
+$btn-icon-green: #0a5009;

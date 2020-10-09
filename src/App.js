@@ -5,50 +5,17 @@ import uid from "uid";
 import stickybits from "stickybits";
 
 import AddCommentIcon from "./components/icons/AddCommentIcon.js";
-
-import Adi from "./img/avatars/Adi.png";
-import Ana from "./img/avatars/Ana.png";
-import Andrew from "./img/avatars/Andrew.png";
-import Angus from "./img/avatars/Angus.png";
-import Anna from "./img/avatars/Anna.png";
-import Annabeth from "./img/avatars/Annabeth.png";
-import Anshul from "./img/avatars/Anshul.png";
-import Bob from "./img/avatars/Bob.png";
-import Brian from "./img/avatars/Brian.png";
-import Catherine from "./img/avatars/Catherine.png";
-import Chris from "./img/avatars/Chris.png";
-import ChrisHayes from "./img/avatars/ChrisHayes.png";
-import DavidPaparelli from "./img/avatars/DavidPaparelli.jpg";
-import Emmy from "./img/avatars/Emmy.png";
-import Eric from "./img/avatars/Eric.png";
-import Erik from "./img/avatars/Erik.png";
-import Greg from "./img/avatars/Greg.png";
-import Hansel from "./img/avatars/Hansel.png";
-import Harrison from "./img/avatars/Harrison.png";
-import James from "./img/avatars/James.jpg";
-import Joi from "./img/avatars/Joi.png";
-import Kristina from "./img/avatars/Kristina.png";
-import Lea from "./img/avatars/Lea.png";
-import Maggie from "./img/avatars/Maggie.png";
-import Max from "./img/avatars/Max.png";
-import May from "./img/avatars/May.png";
-import Mel from "./img/avatars/Mel.jpg";
-import MichaelCooney from "./img/avatars/MichaelCooney.png";
-import Neha from "./img/avatars/Neha.png";
-import Noah from "./img/avatars/Noah.png";
-import Rachel from "./img/avatars/Rachel.png";
-import Rob from "./img/avatars/Rob.png";
-import Sarah from "./img/avatars/Sarah.png";
-import Saumil from "./img/avatars/Saumil.png";
-import Saurin from "./img/avatars/Saurin.png";
-import ScottWoolf from "./img/avatars/ScottWoolf.png";
-import Shanni from "./img/avatars/Shanni.png";
-import Steven from "./img/avatars/Steven.png";
-import Vaibhav from "./img/avatars/Vaibhav.png";
-import Will from "./img/avatars/Will.png";
-import Zach from "./img/avatars/Zach.png";
+import FilterIcon from "./components/icons/FilterIcon.js";
+import AddIcon from "./components/icons/AddIcon.js";
+import AddPhotoIcon from "./components/icons/AddPhotoIcon.js";
+import CloseIcon from "./components/icons/CloseIcon.js";
 
 import "./styles/index.scss";
+
+import { randomAvatarColors, monthNames } from "./utils";
+import { photoMap } from "./photoMap";
+
+import FilterModal from "./components/FilterModal";
 
 import AddMilestoneForm from "./components/AddMilestoneForm.js";
 import SubmitEditForm from "./components/SubmitEditForm.js";
@@ -57,6 +24,7 @@ function App() {
   // DATA RETURNED FROM SPREADSHEETS:
   const [data, updateData] = useState([]);
 
+  // FILTER SELECTIONS
   const [filterTypes, updateFilterTypes] = useState([
     {
       type: "event",
@@ -80,8 +48,6 @@ function App() {
     },
   ]);
   const [filterPeople, updateFilterPeople] = useState([]);
-  const [checkAllPeople, updateCheckAllPeople] = useState(false);
-  const [checkAllTypes, updateCheckAllTypes] = useState(false);
   const [isFilterPeopleExclusive, updateIsFilterPeopleExclusive] = useState(
     true
   );
@@ -91,7 +57,7 @@ function App() {
   const [milestonePeopleToSubmit, updateMilestonePeopleToSubmit] = useState("");
 
   // MODAL CONTROLS:
-  const [modalOpen, updateModal] = useState(false); // rename to filter modal
+  const [filterModalOpen, updateFilterModal] = useState(false);
   const [editModalOpen, updateEditModalOpen] = useState(false);
   const [addModalOpen, updateAddModalOpen] = useState(false);
 
@@ -110,7 +76,11 @@ function App() {
   const [addEventOtherPeople, updateAddEventOtherPeople] = useState(""); // "Anyone else?"
 
   // stick the years on scroll
-  stickybits(".year-wrap", { useStickyClasses: true });
+  stickybits(".year-wrap", {
+    useStickyClasses: true,
+    stickyBitStickyOffset: 70,
+  });
+  stickybits(".title-wrap", { useStickyClasses: true });
 
   // runs once on page load:
   useEffect(() => {
@@ -210,8 +180,8 @@ function App() {
       });
       let dataFromBothSheets = mainTimeline.concat(FILTERED_RESPONSES);
       let sortedData = dataFromBothSheets.sort((a, b) =>
-        formatDateForSort(a.date) > formatDateForSort(b.date) ? 1 : -1
-      ); // sort by date
+        formatDateForSort(a.date) < formatDateForSort(b.date) ? 1 : -1
+      ); // sort by date, most recent first
       updateData(sortedData);
       createFilters(sortedData);
     }
@@ -244,20 +214,6 @@ function App() {
   }, []);
 
   function formatDate(dateString, precise) {
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
     const splitString = dateString.split("/");
     const month = monthNames[parseInt(splitString[0], 10) - 1];
     const day = parseInt(splitString[1], 10);
@@ -288,69 +244,7 @@ function App() {
   }
 
   let showYear = false;
-  let currentYear = 0;
-
-  const photoMap = {
-    Adi,
-    Ana,
-    Andrew,
-    "Angus Logan": Angus,
-    Anna,
-    Annabeth,
-    Anshul,
-    Bob,
-    Brian,
-    Catherine,
-    Chris,
-    "Chris Hayes": ChrisHayes,
-    "David Paparelli": DavidPaparelli,
-    Emmy,
-    Eric,
-    Erik,
-    Greg,
-    Hansel,
-    Harrison,
-    James,
-    Joi,
-    Kristina,
-    Lea,
-    Maggie,
-    Max,
-    May,
-    Mel,
-    "Michael Cooney": MichaelCooney,
-    Neha,
-    Noah,
-    Rachel,
-    Rob,
-    Sarah,
-    Saumil,
-    Saurin,
-    "Scott Woolf": ScottWoolf,
-    Shanni,
-    Steven,
-    Vaibhav,
-    Will,
-    Zach,
-  };
-
-  const randomAvatarColors = [
-    "#beebe9",
-    "#f4dada",
-    "#ffb6b9",
-    "#f6eec7",
-    "#f1c6d3",
-    "#e4a3d4",
-    "#c295d8",
-    "#b0deff",
-    "#ffc5a1",
-    "#ffd19a",
-    "#fff8a6",
-    "#b0deff",
-    "#ffc5a1",
-    "#ffd19a",
-    "#fff8a6",
-  ];
+  let currentYear = new Date().getFullYear() + 1;
 
   const timelineItems = data.map(
     ({ event, precise, date, type, size, people }, index) => {
@@ -376,7 +270,7 @@ function App() {
 
       // don't show year UNLESS it hasn't been shown yet
       showYear = false;
-      if (formatDate(date, precise)[1] > currentYear && !hideThisItem) {
+      if (formatDate(date, precise)[1] < currentYear && !hideThisItem) {
         showYear = true;
         currentYear = formatDate(date, precise)[1];
       }
@@ -430,7 +324,7 @@ function App() {
 
             <div className="edit-btn-wrap">
               <div
-                className="edit-btn"
+                className="btn btn--purple"
                 onClick={() => {
                   updateEditModalOpen(true);
                   updateMilestoneDescToSubmit(event);
@@ -438,7 +332,7 @@ function App() {
                   updateMilestonePeopleToSubmit(people);
                 }}
               >
-                <AddCommentIcon fill="#bbbbbb" />
+                <AddCommentIcon fill="#7303734d" />
               </div>
             </div>
           </div>
@@ -446,49 +340,6 @@ function App() {
       );
     }
   );
-
-  const typeCheckboxes = filterTypes.map((filter, i) => {
-    return (
-      <div key={filter.uid} className="form-field form-field--checkbox">
-        <label
-          // key={filter.uid}
-          className={`checkbox-container checkbox--${filter.type}`}
-        >
-          {filter.type}
-          <input
-            type="checkbox"
-            onChange={(e) => {
-              let newFilterTypes = [...filterTypes];
-              newFilterTypes[i].checked = !newFilterTypes[i].checked;
-              updateFilterTypes(newFilterTypes);
-            }}
-            checked={filter.checked}
-          />
-          <span className="checkmark" />
-        </label>
-      </div>
-    );
-  });
-
-  const peopleCheckboxes = filterPeople.map((filter, i) => {
-    return (
-      <div key={filter.uid} className="form-field form-field--checkbox">
-        <label className="checkbox-container">
-          {filter.person}
-          <input
-            type="checkbox"
-            onChange={() => {
-              let newFilterPeople = [...filterPeople];
-              newFilterPeople[i].checked = !newFilterPeople[i].checked;
-              updateFilterPeople(newFilterPeople);
-            }}
-            checked={filter.checked}
-          />
-          <span className="checkmark" />
-        </label>
-      </div>
-    );
-  });
 
   const addEventCheckboxes = addEventCheckboxesData.map((checkData, i) => {
     return (
@@ -511,36 +362,6 @@ function App() {
       </div>
     );
   });
-
-  function updateAllPeopleCheckboxes(value) {
-    let oldFilterPeople = [...filterPeople];
-    let newFilterPeople = [];
-    oldFilterPeople.forEach(({ person, uid }) => {
-      let newFilter = {
-        person,
-        checked: value,
-        uid,
-      };
-      newFilterPeople.push(newFilter);
-    });
-    updateFilterPeople(newFilterPeople);
-    updateCheckAllPeople(!checkAllPeople);
-  }
-
-  function updateAllTypeCheckboxes(value) {
-    let oldFilterTypes = [...filterTypes];
-    let newFilterTypes = [];
-    oldFilterTypes.forEach(({ type, uid }) => {
-      let newFilter = {
-        type,
-        checked: value,
-        uid,
-      };
-      newFilterTypes.push(newFilter);
-    });
-    updateFilterTypes(newFilterTypes);
-    updateCheckAllTypes(!checkAllTypes);
-  }
 
   function updateAllAddEventCheckboxes(value) {
     let oldAddEventCheckboxesData = [...addEventCheckboxesData];
@@ -604,34 +425,33 @@ function App() {
       <div className="timeline">
         <div className="title-wrap">
           <h1 className="title">
-            The <br />
-            Baller <br />
-            Express
+            <span className="mobile">🚂</span>
+            <span className="desktop">The Baller Express</span>
           </h1>
           <div className="btn-wrap">
             <a
-              className="btn"
+              className="btn btn--orange"
               onClick={() => {
-                updateModal(true);
+                updateFilterModal(true);
               }}
             >
-              Filter the timeline
-            </a>
-            <a
-              className="btn"
-              onClick={() => {
-                updateAddModalOpen(true);
-              }}
-            >
-              Add a milestone
+              <FilterIcon />
             </a>
             <a
               href="https://photos.app.goo.gl/dEVzY9gZQb4pjsfM9"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn"
+              className="btn btn--green"
             >
-              Upload your photos
+              <AddPhotoIcon />
+            </a>
+            <a
+              className="btn btn--blue"
+              onClick={() => {
+                updateAddModalOpen(true);
+              }}
+            >
+              <AddIcon />
             </a>
           </div>
         </div>
@@ -661,7 +481,7 @@ function App() {
               closeEditModal();
             }}
           >
-            close
+            <CloseIcon />
           </div>
 
           <script type="text/javascript">var submitted=false;</script>
@@ -711,7 +531,7 @@ function App() {
               closeAddModal();
             }}
           >
-            close
+            <CloseIcon />
           </div>
           <AddMilestoneForm
             onSubmit={() =>
@@ -735,76 +555,16 @@ function App() {
         </div>
       </div>
 
-      <div className={`modal-wrap ${modalOpen ? "modal-open" : ""}`}>
-        <div
-          className="modal-bg"
-          onClick={() => {
-            updateModal(false);
-          }}
-        />
-        <div className="modal modal--filter">
-          <div
-            className="modal-close"
-            onClick={() => {
-              updateModal(false);
-            }}
-          >
-            close
-          </div>
-          <div className="filter-block--type">
-            <div className="filter-header">
-              <h2>Milestones</h2>
-              <p
-                className="check-all"
-                onClick={() => {
-                  updateAllTypeCheckboxes(checkAllTypes);
-                }}
-              >
-                {checkAllTypes ? "Check all" : "Uncheck all"}
-              </p>
-            </div>
-            <div className="filter-wrap">
-              <div className="filter filter-type">{typeCheckboxes}</div>
-            </div>
-          </div>
-          <div className="filter-block--people">
-            <div className="filter-header">
-              <div>
-                <h2>People</h2>
-                <p
-                  className="check-all"
-                  onClick={() => {
-                    updateAllPeopleCheckboxes(checkAllPeople);
-                  }}
-                >
-                  {checkAllPeople ? "Check all" : "Uncheck all"}
-                </p>
-              </div>
-
-              <div className="exclusive-wrapper">
-                <p className="exclusive-label">
-                  Only show milestones that involve ALL people selected below
-                </p>
-                <div>
-                  <label className="switch">
-                    <input
-                      type="checkbox"
-                      onChange={() => {
-                        updateIsFilterPeopleExclusive(!isFilterPeopleExclusive);
-                      }}
-                      checked={!isFilterPeopleExclusive}
-                    />
-                    <span className="slider round" />
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div className="filter-wrap">
-              <div className="filter filter-people">{peopleCheckboxes}</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <FilterModal
+        filterModalOpen={filterModalOpen}
+        updateFilterModal={updateFilterModal}
+        filterTypes={filterTypes}
+        updateFilterTypes={updateFilterTypes}
+        filterPeople={filterPeople}
+        updateFilterPeople={updateFilterPeople}
+        isFilterPeopleExclusive={isFilterPeopleExclusive}
+        updateIsFilterPeopleExclusive={updateIsFilterPeopleExclusive}
+      ></FilterModal>
     </div>
   );
 }

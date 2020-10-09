@@ -2,55 +2,173 @@
 @import "./forms.scss";
 @import "./modals.scss";
 
-$edit-btn-width: calc(162px + 20px); // width plus padding
+* {
+  box-sizing: border-box;
+}
 
 .App * {
   font-family: "Nunito", sans-serif;
   color: $dark-text;
 }
 
-* {
-  box-sizing: border-box;
+body {
+  margin: 0 0;
 }
 
 .timeline {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto 90px;
-  font-family: "Raleway", sans-serif;
+  padding: 0 60px;
+  @media (max-width: $break-mobile) {
+    padding: 0 0;
+  }
 }
 
 .title-wrap {
+  padding: 10px 0 10px 20px;
+  justify-content: center;
+  align-items: flex-start;
   display: flex;
-  padding: 50px 0 0 20px;
+  margin-bottom: 20px;
+  margin-top: 40px;
+  background: #fff;
+  z-index: 2;
+
   @media (max-width: $break-mobile) {
-    flex-direction: column;
+    margin-top: 0;
   }
 }
 
 .title {
-  font-size: 48px;
-  font-weight: normal;
-  margin: 0 0 30px;
+  font-size: 42px;
+  margin: 0 0;
   flex-grow: 1;
-  text-align: right;
+  background-color: $gradient-1; //fallback if gradient doesn't work
+  background-image: linear-gradient(
+    to right,
+    $gradient-1,
+    $gradient-2,
+    $gradient-3
+  );
+  // https://fossheim.io/writing/posts/css-text-gradient/
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+
+  .mobile {
+    display: none;
+  }
   @media (max-width: $break-mobile) {
-    text-align: left;
+    .mobile {
+      display: inline-block;
+    }
+    .desktop {
+      display: none;
+    }
   }
 }
 
-.year-wrap,
-.title-wrap {
-  padding-right: $edit-btn-width;
-  @media (max-width: $break-mobile) {
-    padding-right: 20px;
+.btn-wrap {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  flex-grow: 2;
+  padding: 4px 0;
+}
+
+.btn {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  border-radius: 0;
+
+  &:hover {
+    opacity: 1;
+
+    &:after {
+      left: 8px;
+      opacity: 1;
+    }
+  }
+
+  &:after {
+    content: "";
+    width: 46px;
+    height: 46px;
+    border-radius: 49px;
+    top: 0px;
+    left: -49px;
+    opacity: 0;
+    position: absolute;
+    transition: 0.2s all;
+    z-index: -1;
+  }
+
+  &.btn--purple {
+    &:after {
+      background: $btn-bg-purple;
+    }
+    &:hover {
+      svg {
+        fill: $btn-icon-purple;
+      }
+    }
+  }
+
+  &.btn--blue {
+    &:after {
+      background: $btn-bg-blue;
+    }
+    &:hover {
+      svg {
+        fill: $btn-icon-blue;
+      }
+    }
+  }
+
+  &.btn--orange {
+    &:after {
+      background: $btn-bg-orange;
+    }
+    &:hover {
+      svg {
+        fill: $btn-icon-orange;
+      }
+    }
+  }
+
+  &.btn--green {
+    &:after {
+      background: $btn-bg-green;
+    }
+    &:hover {
+      svg {
+        fill: $btn-icon-green;
+      }
+    }
+  }
+}
+
+.btn {
+  padding: 10px 20px;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 5px;
+  transition: all 0.3s;
+  &:hover {
+    opacity: 0.7;
   }
 }
 
 .year-wrap {
-  box-shadow: 0px -4px 12px 9px #fff;
+  box-shadow: 0px -4px 10px 2px #fff;
   @media (max-width: $break-mobile) {
     background: #fff;
-    z-index: 1;
+    z-index: 2;
   }
 }
 
@@ -61,9 +179,11 @@ $edit-btn-width: calc(162px + 20px); // width plus padding
   font-weight: 300;
   width: 34%;
   text-align: left;
-  padding: 50px 0 0 20px;
+  padding: 5px 0 5px 20px;
+  margin-bottom: -60px;
   @media (max-width: $break-mobile) {
     width: 100%;
+    margin-bottom: 0;
   }
 }
 
@@ -74,7 +194,7 @@ $edit-btn-width: calc(162px + 20px); // width plus padding
 .item {
   display: flex;
   flex: 0 50%;
-  padding: 20px $edit-btn-width 20px 20px;
+  padding: 20px 20px;
   position: relative;
 
   &:hover {
@@ -179,7 +299,7 @@ $edit-btn-width: calc(162px + 20px); // width plus padding
   top: 100%;
   margin-top: 10px;
   background: $tooltip-bg;
-  color: #333333;
+  color: $dark-text;
   padding: 5px 10px 3px;
   border-radius: 5px;
   font-size: 13px;
@@ -204,6 +324,7 @@ $edit-btn-width: calc(162px + 20px); // width plus padding
   font-size: 14px;
   color: $dark-text;
   letter-spacing: 0.1px;
+  z-index: 1;
 
   &:after {
     content: "";
@@ -227,119 +348,19 @@ $edit-btn-width: calc(162px + 20px); // width plus padding
   }
 }
 
-.btn-wrap {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  flex-direction: column;
-  flex-grow: 2;
-
-  .btn {
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    border-radius: 0;
-
-    &:hover {
-      opacity: 1;
-      &:after {
-        left: 0%;
-      }
-    }
-
-    &:after {
-      content: "";
-      width: 100%;
-      height: 100%;
-      left: 100%;
-      top: 0;
-      position: absolute;
-      transition: 0.3s all;
-      z-index: -1;
-    }
-
-    &:nth-child(1) {
-      &:after {
-        background: #fbbaff6b;
-      }
-    }
-    &:nth-child(2) {
-      &:after {
-        background: #baefff6b;
-      }
-    }
-    &:nth-child(3) {
-      &:after {
-        background: #baffcf6b;
-      }
-    }
-  }
-}
-
-.btn {
-  padding: 10px 20px;
-  text-decoration: none;
-  text-transform: uppercase;
-  font-size: 14px;
-  font-weight: bold;
-  border-radius: 5px;
-  transition: all 0.3s;
-  &:hover {
-    opacity: 0.7;
-  }
-}
-
 .edit-btn-wrap {
   overflow: hidden;
   position: absolute;
-  right: 0;
+  right: -40px;
   opacity: 0;
   transition: 0.3s all;
+  z-index: 1;
 
   @media (max-width: $break-mobile) {
     opacity: 1;
-    right: 20px;
+    right: 0;
     top: 10px;
     overflow: visible;
-  }
-}
-
-.edit-btn {
-  position: relative;
-  transition: 0.3s all;
-  display: flex;
-  align-items: center;
-  color: #fff;
-  cursor: pointer;
-  left: 0;
-  border-radius: 30px;
-  padding: 8px 8px;
-
-  &:hover {
-    svg {
-      fill: #fff;
-    }
-    left: 0px;
-    background: $edit-btn-bg;
-  }
-
-  @media (max-width: $break-mobile) {
-    top: 0px;
-
-    svg {
-      fill: #cdcdcd !important;
-    }
-  }
-}
-
-.edit-text {
-  margin-left: 5px;
-  text-transform: uppercase;
-  font-size: 14px;
-  font-weight: bold;
-
-  @media (max-width: $break-mobile) {
-    display: none;
   }
 }
 

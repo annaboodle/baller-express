@@ -1,0 +1,32 @@
+export const randomAvatarColors = [
+  "#beebe9",
+  "#f4dada",
+  "#ffb6b9",
+  "#f6eec7",
+  "#f1c6d3",
+  "#e4a3d4",
+  "#c295d8",
+  "#b0deff",
+  "#ffc5a1",
+  "#ffd19a",
+  "#fff8a6",
+  "#b0deff",
+  "#ffc5a1",
+  "#ffd19a",
+  "#fff8a6",
+];
+
+export const monthNames = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
