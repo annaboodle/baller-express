@@ -43,13 +43,38 @@ body {
   font-size: 42px;
   margin: 0 0;
   flex-grow: 1;
-  background-color: $gradient-1; //fallback if gradient doesn't work
-  background-image: linear-gradient(
+  background: $gradient-1; //fallback if gradient doesn't work
+  background: -moz-linear-gradient(
     to right,
     $gradient-1,
     $gradient-2,
     $gradient-3
-  );
+  ); /* FF3.6+ */
+  background: -webkit-linear-gradient(
+    to right,
+    $gradient-1,
+    $gradient-2,
+    $gradient-3
+  ); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(
+    to right,
+    $gradient-1,
+    $gradient-2,
+    $gradient-3
+  ); /* Opera 11.10+ */
+  background: -ms-linear-gradient(
+    to right,
+    $gradient-1,
+    $gradient-2,
+    $gradient-3
+  ); /* IE10+ */
+  background: linear-gradient(
+    to right,
+    $gradient-1,
+    $gradient-2,
+    $gradient-3
+  ); /* W3C */
+
   // https://fossheim.io/writing/posts/css-text-gradient/
   -webkit-background-clip: text;
   -moz-background-clip: text;
