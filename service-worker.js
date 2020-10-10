@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/baller-express/precache-manifest.7cc4439d352dbccc6ab6f8dbc557804e.js"
+  "/baller-express/precache-manifest.d6e249c0d0d392c847be85403046a9a2.js"
 );
 
 self.addEventListener('message', (event) => {
