@@ -10,17 +10,18 @@ import AddIcon from "./components/icons/AddIcon.js";
 import AddPhotoIcon from "./components/icons/AddPhotoIcon.js";
 import CloseIcon from "./components/icons/CloseIcon.js";
 
-import "./styles/index.scss";
+import FilterModal from "./components/FilterModal";
+import Loader from "./components/Loader";
+
+import AddMilestoneForm from "./components/AddMilestoneForm.js";
+import SubmitEditForm from "./components/SubmitEditForm.js";
 
 import { randomAvatarColors, monthNames } from "./utils";
 import { photoMap } from "./photoMap";
 
 import BallerExpress from "./img/baller-express.png";
 
-import FilterModal from "./components/FilterModal";
-
-import AddMilestoneForm from "./components/AddMilestoneForm.js";
-import SubmitEditForm from "./components/SubmitEditForm.js";
+import "./styles/index.scss";
 
 function App() {
   // DATA RETURNED FROM SPREADSHEETS:
@@ -466,7 +467,7 @@ function App() {
           </div>
         </div>
 
-        {timelineItems}
+        {data.length === 0 ? <Loader /> : timelineItems}
       </div>
 
       <div className="footer">
