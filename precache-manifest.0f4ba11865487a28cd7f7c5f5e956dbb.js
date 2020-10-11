@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "4ec812684eef1f0c1ec665cd5fc1a0fc",
+    "revision": "1c2d1dce250efaa61f1699cd834596ab",
     "url": "/baller-express/index.html"
   },
   {
-    "revision": "a667b36f25f6d07dbd98",
+    "revision": "f6c74556e49cc03b4a2a",
     "url": "/baller-express/static/css/main.3984937f.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/baller-express/static/js/2.e67e40d6.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "a667b36f25f6d07dbd98",
-    "url": "/baller-express/static/js/main.168569a6.chunk.js"
+    "revision": "f6c74556e49cc03b4a2a",
+    "url": "/baller-express/static/js/main.90b2e41e.chunk.js"
   },
   {
     "revision": "74330397d93e0039971b",
