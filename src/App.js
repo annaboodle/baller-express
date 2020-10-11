@@ -78,12 +78,13 @@ function App() {
   const [addEventCheckboxesData, updateAddEventCheckboxesData] = useState([]); // an array of objects representing checkboxes of people
   const [addEventOtherPeople, updateAddEventOtherPeople] = useState(""); // "Anyone else?"
 
+  // stick the header
+  stickybits(".header", { stickyBitStickyOffset: 0 });
   // stick the years on scroll
   stickybits(".year-wrap", {
     useStickyClasses: true,
     stickyBitStickyOffset: 70,
   });
-  stickybits(".header", { useStickyClasses: true });
 
   // runs once on page load:
   useEffect(() => {
@@ -466,7 +467,7 @@ function App() {
             </a>
           </div>
         </div>
-
+        {/* {timelineItems}   */}
         {data.length === 0 ? <Loader /> : timelineItems}
       </div>
 
