@@ -429,16 +429,14 @@ function App() {
       <div className="timeline">
         <div className="header">
           <div className="title-wrapper">
-            <div
+            {/* <div
               style={{
                 backgroundImage: `url(${BallerExpress})`,
               }}
               className="logo"
-            ></div>
-            <h1 className="title">
-              {/* <span className="mobile">🚂</span> */}
-              The Baller Express
-            </h1>
+            ></div> */}
+            <span className="logo-emoji">🚂</span>
+            <h1 className="title">The Baller Express</h1>
           </div>
           <div className="btn-wrap">
             <a
