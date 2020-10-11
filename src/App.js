@@ -328,7 +328,7 @@ function App() {
 
             <div className="edit-btn-wrap">
               <div
-                className="btn btn--purple"
+                className="btn btn--blue"
                 onClick={() => {
                   updateEditModalOpen(true);
                   updateMilestoneDescToSubmit(event);
@@ -336,7 +336,7 @@ function App() {
                   updateMilestonePeopleToSubmit(people);
                 }}
               >
-                <AddCommentIcon fill="#7303734d" />
+                <AddCommentIcon fill="#00ade06b" />
               </div>
             </div>
           </div>
@@ -429,12 +429,6 @@ function App() {
       <div className="timeline">
         <div className="header">
           <div className="title-wrapper">
-            {/* <div
-              style={{
-                backgroundImage: `url(${BallerExpress})`,
-              }}
-              className="logo"
-            ></div> */}
             <span className="logo-emoji">🚂</span>
             <h1 className="title">The Baller Express</h1>
           </div>
