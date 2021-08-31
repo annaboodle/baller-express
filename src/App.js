@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Papa from "papaparse";
-import Tabletop from "tabletop";
 import uid from "uid";
 import stickybits from "stickybits";
 
@@ -18,8 +17,6 @@ import SubmitEditForm from "./components/SubmitEditForm.js";
 
 import { randomAvatarColors, monthNames } from "./utils";
 import { photoMap } from "./photoMap";
-
-import BallerExpress from "./img/baller-express.png";
 
 import "./styles/index.scss";
 
@@ -51,9 +48,8 @@ function App() {
     },
   ]);
   const [filterPeople, updateFilterPeople] = useState([]);
-  const [isFilterPeopleExclusive, updateIsFilterPeopleExclusive] = useState(
-    true
-  );
+  const [isFilterPeopleExclusive, updateIsFilterPeopleExclusive] =
+    useState(true);
 
   const [milestoneDescToSubmit, updateMilestoneDescToSubmit] = useState("");
   const [milestoneDateToSubmit, updateMilestoneDateToSubmit] = useState("");
@@ -80,6 +76,7 @@ function App() {
 
   // stick the header
   stickybits(".header", { stickyBitStickyOffset: 0 });
+
   // stick the years on scroll
   stickybits(".year-wrap", {
     useStickyClasses: true,
@@ -138,83 +135,86 @@ function App() {
       return [formattedDate];
     }
 
-    /* FOLLOWING CODE IS FOR PAPAPARSE. TBA ON WHETHER THIS WILL WORK */
+    /* FOLLOWING CODE IS FOR PAPAPARSE */
+    const MASTER_SHEET =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSQVovaTHIAN1669rUYinPqb3VfZIGBvpgiqKkNNW44Zkl2ZHhx-MdVCsD6CHDVUnmcc__UDNR5LBrt/pub?output=csv";
 
-    // const MASTER_SHEET =
-    //   "https://docs.google.com/spreadsheets/d/e/2PACX-1vSQVovaTHIAN1669rUYinPqb3VfZIGBvpgiqKkNNW44Zkl2ZHhx-MdVCsD6CHDVUnmcc__UDNR5LBrt/pub?output=csv";
+    const SUBMITTED_MILESTONES =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQYc1XgbSvLbZZwd-ta4Nm0hJ3K75-FpOIBkk8n01mUDZXiXw3cAeZ91i5heLWKowOjnSEk9PZioAb8/pub?output=csv";
 
-    // const SUBMITTED_MILESTONES =
-    //   "https://docs.google.com/spreadsheets/d/e/2PACX-1vQYc1XgbSvLbZZwd-ta4Nm0hJ3K75-FpOIBkk8n01mUDZXiXw3cAeZ91i5heLWKowOjnSEk9PZioAb8/pub?output=csv";
+    let MASTER_SHEET_DATA = [];
 
-    // let MASTER_SHEET_DATA = [];
+    Papa.parse(MASTER_SHEET, {
+      download: true,
+      header: true,
+      complete: saveAndGetSubmittedResponses,
+    });
 
-    // Papa.parse(MASTER_SHEET, {
-    //   download: true,
-    //   header: true,
-    //   complete: saveAndGetSubmittedResponses,
-    // });
+    function saveAndGetSubmittedResponses(masterSheetData) {
+      MASTER_SHEET_DATA = masterSheetData.data;
 
-    // function saveAndGetSubmittedResponses(masterSheetData) {
-    //   MASTER_SHEET_DATA = masterSheetData.data;
+      Papa.parse(SUBMITTED_MILESTONES, {
+        download: true,
+        header: true,
+        complete: finishSetup,
+      });
+    }
 
-    //   Papa.parse(SUBMITTED_MILESTONES, {
-    //     download: true,
-    //     header: true,
-    //     complete: finishSetup,
+    function finishSetup(submittedResponsesData) {
+      const FILTERED_RESPONSES = submittedResponsesData.data.filter(
+        (milestone) => {
+          return milestone.hide !== "Y"; // filter out responses we want to hide
+        }
+      );
+      let dataFromBothSheets = MASTER_SHEET_DATA.concat(FILTERED_RESPONSES);
+      let sortedData = dataFromBothSheets.sort((a, b) =>
+        formatDateForSort(a.date) < formatDateForSort(b.date) ? 1 : -1
+      ); // sort by date
+      updateData(sortedData);
+      createFilters(sortedData);
+    }
+    /* END CODE FOR PAPAPARSE */
+
+    /* FOLLOWING CODE IS FOR TABLETOP. WORKED UNTIL AUGUST 2021 - KEEPING AS BACKUP FOR PAPAPARSE  */
+    // function finishSetup(mainTimeline, submittedResponses) {
+    //   const FILTERED_RESPONSES = submittedResponses.filter((milestone) => {
+    //     return milestone.hide !== "Y"; // filter out responses we want to hide
     //   });
-    // }
-
-    // function finishSetup(submittedResponsesData) {
-    //   const FILTERED_RESPONSES = submittedResponsesData.data.filter(
-    //     (milestone) => {
-    //       return milestone.hide !== "Y"; // filter out responses we want to hide
-    //     }
-    //   );
-    //   let dataFromBothSheets = MASTER_SHEET_DATA.concat(FILTERED_RESPONSES);
+    //   let dataFromBothSheets = mainTimeline.concat(FILTERED_RESPONSES);
     //   let sortedData = dataFromBothSheets.sort((a, b) =>
-    //     formatDateForSort(a.date) > formatDateForSort(b.date) ? 1 : -1
-    //   ); // sort by date
+    //     formatDateForSort(a.date) < formatDateForSort(b.date) ? 1 : -1
+    //   ); // sort by date, most recent first
     //   updateData(sortedData);
     //   createFilters(sortedData);
     // }
 
-    function finishSetup(mainTimeline, submittedResponses) {
-      const FILTERED_RESPONSES = submittedResponses.filter((milestone) => {
-        return milestone.hide !== "Y"; // filter out responses we want to hide
-      });
-      let dataFromBothSheets = mainTimeline.concat(FILTERED_RESPONSES);
-      let sortedData = dataFromBothSheets.sort((a, b) =>
-        formatDateForSort(a.date) < formatDateForSort(b.date) ? 1 : -1
-      ); // sort by date, most recent first
-      updateData(sortedData);
-      createFilters(sortedData);
-    }
+    //   const mainTimelineData =
+    //     "https://docs.google.com/spreadsheets/d/1v96fpa9peEx2LLEnto3FeagSkWOmsCM8JlRKoa1HDpE/pubhtml";
 
-    const mainTimelineData =
-      "https://docs.google.com/spreadsheets/d/1v96fpa9peEx2LLEnto3FeagSkWOmsCM8JlRKoa1HDpE/pubhtml";
+    //   const submittedResponseData =
+    //     "https://docs.google.com/spreadsheets/d/1DFao95ZdEZLDeHEX8LxY4FsRN5q4cqBDiGZYTKYDObc/pubhtml";
 
-    const submittedResponseData =
-      "https://docs.google.com/spreadsheets/d/1DFao95ZdEZLDeHEX8LxY4FsRN5q4cqBDiGZYTKYDObc/pubhtml";
+    //   let mainTimeline = [];
 
-    let mainTimeline = [];
+    //   const setup = () => {
+    //     Tabletop.init({
+    //       key: mainTimelineData,
+    //       callback: function (data, tabletop) {
+    //         mainTimeline = data;
+    //         Tabletop.init({
+    //           key: submittedResponseData,
+    //           callback: (data) => {
+    //             finishSetup(mainTimeline, data);
+    //           },
+    //           simpleSheet: true,
+    //         });
+    //       },
+    //       simpleSheet: true,
+    //     });
+    //   };
 
-    const setup = () => {
-      Tabletop.init({
-        key: mainTimelineData,
-        callback: function (data, tabletop) {
-          mainTimeline = data;
-          Tabletop.init({
-            key: submittedResponseData,
-            callback: (data) => {
-              finishSetup(mainTimeline, data);
-            },
-            simpleSheet: true,
-          });
-        },
-        simpleSheet: true,
-      });
-    };
-    setup();
+    //   setup();
+    /* END CODE FOR TABLETOP */
   }, []);
 
   function formatDate(dateString, precise) {
@@ -231,6 +231,7 @@ function App() {
     if (filter.checked) {
       peopleToShow.push(`${filter.person}`);
     }
+    return peopleToShow;
   });
 
   let typesToHide = [];
@@ -238,6 +239,7 @@ function App() {
     if (!filter.checked) {
       typesToHide.push(`${filter.type}`);
     }
+    return typesToHide;
   });
 
   // take comma separated string and return array of people strings
@@ -305,12 +307,16 @@ function App() {
       return (
         <>
           {showYear && (
-            <div className="year-wrap" id={formatDate(date, precise)[1]}>
+            <div
+              className="year-wrap"
+              id={formatDate(date, precise)[1]}
+              key={`${index}-year`}
+            >
               <div className="year">{formatDate(date, precise)[1]}</div>
             </div>
           )}
           <div
-            key={index}
+            key={`${index}-item`}
             className={`item type--${type} size--${size || "m"}
           ${hideThisItem ? "hide" : ""} `}
           >
@@ -354,9 +360,8 @@ function App() {
             type="checkbox"
             onChange={() => {
               let newAddEventCheckboxesData = [...addEventCheckboxesData];
-              newAddEventCheckboxesData[i].checked = !newAddEventCheckboxesData[
-                i
-              ].checked;
+              newAddEventCheckboxesData[i].checked =
+                !newAddEventCheckboxesData[i].checked;
               updateAddEventCheckboxesData(newAddEventCheckboxesData);
             }}
             checked={checkData.checked}
@@ -429,18 +434,20 @@ function App() {
       <div className="timeline">
         <div className="header">
           <div className="title-wrapper">
-            <span className="logo-emoji">🚂</span>
+            <span className="logo-emoji" role="img" aria-label="Train emoji">
+              🚂
+            </span>
             <h1 className="title">The Baller Express</h1>
           </div>
           <div className="btn-wrap">
-            <a
+            <button
               className="btn btn--orange"
               onClick={() => {
                 updateFilterModal(true);
               }}
             >
               <FilterIcon />
-            </a>
+            </button>
             <a
               href="https://photos.app.goo.gl/dEVzY9gZQb4pjsfM9"
               target="_blank"
@@ -449,14 +456,14 @@ function App() {
             >
               <AddPhotoIcon />
             </a>
-            <a
+            <button
               className="btn btn--blue"
               onClick={() => {
                 updateAddModalOpen(true);
               }}
             >
               <AddIcon />
-            </a>
+            </button>
           </div>
         </div>
         {/* {timelineItems}   */}
@@ -464,7 +471,10 @@ function App() {
       </div>
 
       <div className="footer">
-        Made by ABC for an amazing group of buddies 💜
+        Made by ABC for an amazing group of buddies{" "}
+        <span role="img" aria-label="Heart emoji">
+          💜
+        </span>
       </div>
 
       <div
@@ -490,10 +500,15 @@ function App() {
 
           <script type="text/javascript">var submitted=false;</script>
           <iframe
+            title="iframe to submit google forms"
             name="hidden_iframe"
             id="hidden_iframe"
             style={{ display: "none" }}
-            onload="if(submitted)  {window.location='#'}"
+            onLoad={(submitted) => {
+              if (submitted) {
+                window.location = "#";
+              }
+            }}
           />
 
           <SubmitEditForm
@@ -509,8 +524,6 @@ function App() {
             milestoneDescToSubmit={milestoneDescToSubmit}
             descCheck={descCheck}
             updateDescCheck={updateDescCheck}
-            peopleCheck={peopleCheck}
-            updatePeopleCheck={updatePeopleCheck}
             editEventDesc={editEventDesc}
             updateEditEventDesc={updateEditEventDesc}
           ></SubmitEditForm>

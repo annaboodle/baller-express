@@ -131,6 +131,8 @@ body {
   overflow: hidden;
   cursor: pointer;
   border-radius: 0;
+  border: none;
+  background: none;
 
   &:hover {
     opacity: 1;
@@ -308,6 +310,9 @@ body {
   flex-basis: 0;
   position: relative;
   margin-left: 35px;
+  @media (max-width: $break-mobile) {
+    margin-left: 0;
+  }
 }
 
 .people-wrap {
