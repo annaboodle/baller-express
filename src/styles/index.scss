@@ -16,7 +16,7 @@ body {
 }
 
 .timeline {
-  max-width: 1000px;
+  max-width: 1005px;
   margin: 0 auto 90px;
   padding: 0 60px;
   @media (max-width: $break-mobile) {
@@ -333,11 +333,8 @@ body {
   justify-content: center;
   font-weight: bold;
   margin-top: 10px;
+  margin-right: 10px;
   position: relative;
-
-  &:not(:last-child) {
-    margin-right: 10px;
-  }
 
   &:hover {
     .person-label {

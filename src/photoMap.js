@@ -15,6 +15,8 @@ import ChrisButler from "./img/avatars/ChrisButler.png";
 import ChrisHayes from "./img/avatars/ChrisHayes.png";
 import Courtney from "./img/avatars/Courtney.png";
 import DavidPaparelli from "./img/avatars/DavidPaparelli.jpg";
+import Ellen from "./img/avatars/Ellen.png";
+import Emily from "./img/avatars/Emily.png";
 import Emmy from "./img/avatars/Emmy.png";
 import Eric from "./img/avatars/Eric.png";
 import Erik from "./img/avatars/Erik.png";
@@ -32,9 +34,11 @@ import Mel from "./img/avatars/Mel.jpg";
 import MichaelCooney from "./img/avatars/MichaelCooney.png";
 import Neha from "./img/avatars/Neha.png";
 import Noah from "./img/avatars/Noah.png";
+import Nolan from "./img/avatars/Nolan.png";
 import PapaHoff from "./img/avatars/PapaHoff.JPG";
 import Rachel from "./img/avatars/Rachel.png";
 import Rob from "./img/avatars/Rob.png";
+import Rohan from "./img/avatars/Rohan.png";
 import Sarah from "./img/avatars/Sarah.png";
 import Saumil from "./img/avatars/Saumil.png";
 import Saurin from "./img/avatars/Saurin.png";
@@ -43,7 +47,9 @@ import ScottWoolf from "./img/avatars/ScottWoolf.png";
 import Shanni from "./img/avatars/Shanni.png";
 import Steven from "./img/avatars/Steven.png";
 import Vaibhav from "./img/avatars/Vaibhav.png";
+import Vanu from "./img/avatars/Vanu.png";
 import Will from "./img/avatars/Will.png";
+import Yemina from "./img/avatars/Yemina.png";
 import Zach from "./img/avatars/Zach.png";
 import Zoe from "./img/avatars/Zoe.png";
 
@@ -65,6 +71,8 @@ export const photoMap = {
   "Chris Hayes": ChrisHayes,
   Courtney,
   "David Paparelli": DavidPaparelli,
+  Ellen,
+  Emily,
   Emmy,
   Eric,
   Erik,
@@ -82,9 +90,11 @@ export const photoMap = {
   "Michael Cooney": MichaelCooney,
   Neha,
   Noah,
+  Nolan,
   "Papa Hoff": PapaHoff,
   Rachel,
   Rob,
+  Rohan,
   Sarah,
   Saumil,
   Saurin,
@@ -93,7 +103,9 @@ export const photoMap = {
   Shanni,
   Steven,
   Vaibhav,
+  Vanu,
   Will,
+  Yemina,
   Zach,
   Zoe,
 };
