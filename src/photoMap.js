@@ -5,6 +5,7 @@ import Angus from "./img/avatars/Angus.png";
 import Anna from "./img/avatars/Anna.png";
 import Annabeth from "./img/avatars/Annabeth.png";
 import Anshul from "./img/avatars/Anshul.png";
+import Aria from "./img/avatars/Aria.jpeg";
 import Azure from "./img/avatars/Azure.jpg";
 import Bailey from "./img/avatars/Bailey.png";
 import Beverly from "./img/avatars/Bev.png";
@@ -30,6 +31,7 @@ import Joi from "./img/avatars/Joi.png";
 import Kavishi from "./img/avatars/Kavishi.jpg";
 import Kristina from "./img/avatars/Kristina.png";
 import Lea from "./img/avatars/Lea.png";
+import Levi from "./img/avatars/Levi.jpeg";
 import Maggie from "./img/avatars/Maggie.png";
 import Max from "./img/avatars/Max.png";
 import May from "./img/avatars/May.png";
@@ -66,6 +68,7 @@ export const photoMap = {
   Anna,
   Annabeth,
   Anshul,
+  Aria,
   Azure,
   Bailey,
   Beverly,
@@ -91,6 +94,7 @@ export const photoMap = {
   Kavishi,
   Kristina,
   Lea,
+  Levi,
   Maggie,
   Max,
   May,
