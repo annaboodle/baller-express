@@ -1,5 +1,5 @@
 import Adi from "./img/avatars/Adi.png";
-import Ana from "./img/avatars/Ana.png";
+import AnaMeyer from "./img/avatars/Ana.png";
 import Andrew from "./img/avatars/Andrew.png";
 import Angus from "./img/avatars/Angus.png";
 import Anna from "./img/avatars/Anna.png";
@@ -62,7 +62,7 @@ import Zoe from "./img/avatars/Zoe.png";
 
 export const photoMap = {
   Adi,
-  Ana,
+  "Ana Meyer": AnaMeyer,
   Andrew,
   "Angus Logan": Angus,
   Anna,
