@@ -19,7 +19,7 @@ import Courtney from "./img/avatars/Courtney.png";
 import DavidPaparelli from "./img/avatars/DavidPaparelli.jpg";
 import Dikul from "./img/avatars/Dikul.jpg";
 import Ellen from "./img/avatars/Ellen.png";
-import Emily from "./img/avatars/Emily.png";
+// import EmilyK from "./img/avatars/EmilyK.png";
 import Emmy from "./img/avatars/Emmy.png";
 import Eric from "./img/avatars/Eric.png";
 import Erik from "./img/avatars/Erik.png";
@@ -82,7 +82,7 @@ export const photoMap = {
   "David Paparelli": DavidPaparelli,
   Dikul,
   Ellen,
-  Emily,
+  // "Emily K": EmilyK,
   Emmy,
   Eric,
   Erik,
