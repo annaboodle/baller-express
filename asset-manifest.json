@@ -1,13 +1,20 @@
 {
   "files": {
     "main.css": "/static/css/main.a0955474.css",
-    "main.js": "/static/js/main.cbc5d061.js",
+    "main.js": "/static/js/main.88a796c6.js",
+    "static/media/Livia.png": "/static/media/Livia.ec51fb94282381763c96.png",
     "static/media/PapaHoff.JPG": "/static/media/PapaHoff.6ba71a4a9495d9635b89.JPG",
     "static/media/Rachel.png": "/static/media/Rachel.1b98b1656c3db90a44ed.png",
     "static/media/Levi.jpeg": "/static/media/Levi.9204f2d569f78c2b1989.jpeg",
+    "static/media/Hector.jpg": "/static/media/Hector.4f8dfe3677c185458fc9.jpg",
+    "static/media/Katie.jpg": "/static/media/Katie.90b0a55439d908277b31.jpg",
     "static/media/Aria.jpeg": "/static/media/Aria.8d861fabc41f3595dd72.jpeg",
+    "static/media/Teal.jpg": "/static/media/Teal.57631b7de2493cfe4277.jpg",
     "static/media/Sam.png": "/static/media/Sam.cda7de4c6e0a97720ccf.png",
+    "static/media/Emily.jpg": "/static/media/Emily.6e8cb2b0e8bf0c186800.jpg",
     "static/media/Zoe.png": "/static/media/Zoe.852233a194c142ed4572.png",
+    "static/media/Anshu.jpg": "/static/media/Anshu.0751185903ad4eadeae5.jpg",
+    "static/media/AnaCem.jpg": "/static/media/AnaCem.d23c84f209d11c81e6e6.jpg",
     "static/media/Saurin.png": "/static/media/Saurin.a5117c3e132863ba92ce.png",
     "static/media/Hansel.png": "/static/media/Hansel.5bbe497506cbbd3ae4d5.png",
     "static/media/May.png": "/static/media/May.8a9566f9ffdb53d891a4.png",
@@ -53,6 +60,7 @@
     "static/media/Adi.png": "/static/media/Adi.9e535b677e82e0645a62.png",
     "static/media/Ellen.png": "/static/media/Ellen.645e278648085462a5ba.png",
     "static/media/Yemina.png": "/static/media/Yemina.3e5e899a66f486a95a4f.png",
+    "static/media/Wylla.jpg": "/static/media/Wylla.fa778936aa448bcab497.jpg",
     "static/media/DavidPaparelli.jpg": "/static/media/DavidPaparelli.8b425528e9013b0f9315.jpg",
     "static/media/Nolan.png": "/static/media/Nolan.d8fec53cfaead284c8de.png",
     "static/media/Rohan.png": "/static/media/Rohan.c8eee79ed824ca834d09.png",
@@ -62,10 +70,10 @@
     "static/media/Tara.jpg": "/static/media/Tara.0e43af0e933ddd7da5fe.jpg",
     "index.html": "/index.html",
     "main.a0955474.css.map": "/static/css/main.a0955474.css.map",
-    "main.cbc5d061.js.map": "/static/js/main.cbc5d061.js.map"
+    "main.88a796c6.js.map": "/static/js/main.88a796c6.js.map"
   },
   "entrypoints": [
     "static/css/main.a0955474.css",
-    "static/js/main.cbc5d061.js"
+    "static/js/main.88a796c6.js"
   ]
 }
