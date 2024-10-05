@@ -1,9 +1,11 @@
 import Adi from "./img/avatars/Adi.png";
 import AnaMeyer from "./img/avatars/Ana.png";
+import AnaCem from "./img/avatars/AnaCem.jpg";
 import Andrew from "./img/avatars/Andrew.png";
 import Angus from "./img/avatars/Angus.png";
 import Anna from "./img/avatars/Anna.png";
 import Annabeth from "./img/avatars/Annabeth.png";
+import Anshu from "./img/avatars/Anshu.jpg";
 import Anshul from "./img/avatars/Anshul.png";
 import Aria from "./img/avatars/Aria.jpeg";
 import Azure from "./img/avatars/Azure.jpg";
@@ -19,6 +21,7 @@ import Courtney from "./img/avatars/Courtney.png";
 import DavidPaparelli from "./img/avatars/DavidPaparelli.jpg";
 import Dikul from "./img/avatars/Dikul.jpg";
 import Ellen from "./img/avatars/Ellen.png";
+import Emily from "./img/avatars/Emily.jpg";
 // import EmilyK from "./img/avatars/EmilyK.png";
 import Emmy from "./img/avatars/Emmy.png";
 import Eric from "./img/avatars/Eric.png";
@@ -26,12 +29,16 @@ import Erik from "./img/avatars/Erik.png";
 import Greg from "./img/avatars/Greg.png";
 import Hansel from "./img/avatars/Hansel.png";
 import Harrison from "./img/avatars/Harrison.png";
+import Hector from "./img/avatars/Hector.jpg";
 import James from "./img/avatars/James.jpg";
 import Joi from "./img/avatars/Joi.png";
+import KaiDi from "./img/avatars/KaiDi.jpg";
+import Katie from "./img/avatars/Katie.jpg";
 import Kavishi from "./img/avatars/Kavishi.jpg";
 import Kristina from "./img/avatars/Kristina.png";
 import Lea from "./img/avatars/Lea.png";
 import Levi from "./img/avatars/Levi.jpeg";
+import Livia from "./img/avatars/Livia.png";
 import Maggie from "./img/avatars/Maggie.png";
 import Max from "./img/avatars/Max.png";
 import May from "./img/avatars/May.png";
@@ -53,9 +60,11 @@ import ScottWoolf from "./img/avatars/ScottWoolf.png";
 import Shanni from "./img/avatars/Shanni.png";
 import Steven from "./img/avatars/Steven.png";
 import Tara from "./img/avatars/Tara.jpg";
+import Teal from "./img/avatars/Teal.jpg";
 import Vaibhav from "./img/avatars/Vaibhav.png";
 import Vanu from "./img/avatars/Vanu.png";
 import Will from "./img/avatars/Will.png";
+import Wylla from "./img/avatars/Wylla.jpg";
 import Yemina from "./img/avatars/Yemina.png";
 import Zach from "./img/avatars/Zach.png";
 import Zoe from "./img/avatars/Zoe.png";
@@ -63,10 +72,12 @@ import Zoe from "./img/avatars/Zoe.png";
 export const photoMap = {
   Adi,
   "Ana Meyer": AnaMeyer,
+  "Ana Cem": AnaCem,
   Andrew,
   "Angus Logan": Angus,
   Anna,
   Annabeth,
+  Anshu,
   Anshul,
   Aria,
   Azure,
@@ -82,6 +93,7 @@ export const photoMap = {
   "David Paparelli": DavidPaparelli,
   Dikul,
   Ellen,
+  Emily,
   // "Emily K": EmilyK,
   Emmy,
   Eric,
@@ -89,12 +101,16 @@ export const photoMap = {
   Greg,
   Hansel,
   Harrison,
+  Hector,
   James,
   Joi,
+  "Kai Di": KaiDi,
+  Katie,
   Kavishi,
   Kristina,
   Lea,
   Levi,
+  Livia,
   Maggie,
   Max,
   May,
@@ -116,9 +132,11 @@ export const photoMap = {
   Shanni,
   Steven,
   Tara,
+  Teal,
   Vaibhav,
   Vanu,
   Will,
+  Wylla,
   Yemina,
   Zach,
   Zoe,
