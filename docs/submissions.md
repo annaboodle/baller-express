@@ -93,6 +93,11 @@ current site must not point to them until the approved production deployment.
 
 ## GitHub settings: do now
 
+**Completed 2026-11-09:** the active ruleset **Protect master** applies to one
+target, `master`. Its bypass list is empty. It restricts deletion, requires a
+pull request with zero required approvals and conversation resolution, and
+blocks force pushes. Required status checks remain off until the CI jobs exist.
+
 Protect `master` without changing any Pages or deployment settings. The
 repository UI observed on 2026-11-09 is **Rulesets / New branch ruleset**:
 

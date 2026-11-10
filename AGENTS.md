@@ -110,6 +110,10 @@ silently start paid usage.
   `master` or `gh-pages`.
 - `master` must be protected: pull requests required, checks required once they
   exist, force pushes and deletion blocked, and bypass disabled.
+- Protection was enabled on 2026-11-09 with the active **Protect master**
+  ruleset. It targets `master`, has an empty bypass list, requires pull requests
+  with zero approvals and conversation resolution, restricts deletion, and
+  blocks force pushes. Required checks are intentionally still off.
 - GitHub currently presents this as a repository ruleset. Use an active
   `Protect master` ruleset with an empty bypass list, target the default branch
   after confirming it is `master`, require pull requests with zero required
