@@ -110,6 +110,11 @@ silently start paid usage.
   `master` or `gh-pages`.
 - `master` must be protected: pull requests required, checks required once they
   exist, force pushes and deletion blocked, and bypass disabled.
+- GitHub currently presents this as a repository ruleset. Use an active
+  `Protect master` ruleset with an empty bypass list, target the default branch
+  after confirming it is `master`, require pull requests with zero required
+  approvals and conversation resolution, restrict deletion, and block force
+  pushes. Do not enable required checks until the jobs exist.
 - Local development uses staging/test resources only. It must not write to the
   production workbook or modify the current Forms.
 - Merging source to `master` must not deploy production.

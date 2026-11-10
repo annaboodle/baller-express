@@ -93,21 +93,34 @@ current site must not point to them until the approved production deployment.
 
 ## GitHub settings: do now
 
-Protect `master` without changing any Pages or deployment settings:
+Protect `master` without changing any Pages or deployment settings. The
+repository UI observed on 2026-11-09 is **Rulesets / New branch ruleset**:
 
-1. Open the repository on GitHub.
-2. Select **Settings**.
-3. Open **Branches** or **Rules > Rulesets**, depending on the current UI.
-4. Create a rule targeting the exact branch name `master`.
-5. Enable **Require a pull request before merging**.
-6. Do not require an approving review unless another reliable reviewer is
-   available; the author cannot satisfy their own required approval.
-7. Enable **Require conversation resolution before merging**.
-8. Keep force pushes disabled.
-9. Keep branch deletion disabled.
-10. Enable **Do not allow bypassing the above settings** so the owner follows the
-    same pull-request path.
-11. Save the rule.
+1. Set **Ruleset Name** to `Protect master`.
+2. Change **Enforcement status** from **Disabled** to **Active**.
+3. Leave the **Bypass list** empty. In the ruleset UI, an empty list is how the
+   owner is kept on the same pull-request path as everyone else.
+4. Under **Target branches**, choose **Add target > Include default branch** and
+   verify GitHub identifies the default branch as `master`. If the UI does not
+   display that option, choose **Include by pattern** and enter exactly
+   `master`.
+5. Leave **Restrict creations** off.
+6. Leave **Restrict updates** off. With an empty bypass list this rule would
+   prevent normal pull-request merges from updating `master`.
+7. Keep **Restrict deletions** on.
+8. Leave linear history, successful deployments, and signed commits off for
+   now.
+9. Turn on **Require a pull request before merging**. In its expanded options:
+   - Set required approvals to `0`.
+   - Turn on **Require conversation resolution before merging**.
+   - Leave Code Owner review, dismissal of stale approvals, and approval of the
+     most recent push off while this remains a solo repository.
+10. Leave **Require status checks to pass** off until the CI jobs exist and have
+    run at least once.
+11. Keep **Block force pushes** on.
+12. Leave code scanning, code quality, code coverage, and automatic Copilot
+    review rules off for now.
+13. Review the rule and select **Create**.
 
 Do not enable required status checks yet; the workflow jobs do not exist and
 GitHub cannot select them until they have run.
