@@ -22,8 +22,8 @@ The Baller Express is an unlisted-public timeline of milestones in a friend
 group: introductions, moves, trips, weddings, babies, and other events.
 
 - Anyone with the URL can view the timeline; it is not authenticated.
-- Whether new milestones publish immediately after server acceptance or wait
-  for owner approval is still an explicit product decision; do not assume it.
+- New milestones publish immediately after server acceptance. The Worker sets
+  owner-controlled publication fields; the browser cannot set them.
 - Proposed edits remain private for manual review and trigger an owner email.
 - Contributor name and email are optional and must remain private.
 
@@ -65,8 +65,8 @@ The target submission path is:
 - The Worker verifies Turnstile server-side, validates the payload, rate-limits,
   deduplicates, and writes through the Google Sheets API.
 - Accepted milestones are written once to `Timeline Source`; the generated tab
-  projects only public fields. Its final publication filter depends on the
-  pending immediate-versus-reviewed publication decision.
+  projects only public fields and immediately includes rows whose
+  owner-controlled `hide` value is not `Y`.
 - Edit proposals are written only to `Edit Proposals` and never auto-apply.
 - The website reads one CSV: `Published Timeline (Generated)`.
 - The old Google Forms are closed and old published Sheets are unpublished only

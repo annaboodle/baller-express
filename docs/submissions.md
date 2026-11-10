@@ -1,6 +1,6 @@
 # Submission security and deployment runbook
 
-Status: proposed design; implementation is awaiting explicit staged approval
+Status: reconciled proposed design; implementation awaits Stage 1 approval
 
 Last reviewed: 2026-11-09
 
@@ -55,6 +55,11 @@ Private canonical timeline. Expected fields include the public event fields plus
 `event_id`, `hide`, `source`, `submitted_at`, `submission_id`, and optional
 private contributor name/email.
 
+For a valid new milestone, the Worker appends one row with the owner-controlled
+default `hide=N`. It never accepts `hide` from the browser. The row therefore
+flows into the generated public tab immediately and can be hidden later by the
+owner if needed.
+
 Historical master events use a source such as `legacy_master` and may have blank
 submission/contact metadata. Migrated legitimate form events use
 `legacy_submission`.
@@ -104,7 +109,7 @@ shutdown of the old Forms requires the applicable later-stage approval.
   runbook, and activate the `Protect master` GitHub ruleset.
 - Reconcile the older Codex plan with the agreed three-tab workbook and the
   stage gates in this runbook.
-- Resolve the new-milestone publication decision below.
+- Completed: resolve the new-milestone publication decision below.
 - Gate: owner explicitly approves the reconciled architecture and authorizes
   Stage 1 only.
 
@@ -135,7 +140,7 @@ shutdown of the old Forms requires the applicable later-stage approval.
 
 - Replace direct Google Form posts in the feature branch with the staging API.
 - Conditionally mount the forms, add Turnstile, validation, loading/error
-  states, retry-safe request IDs, and the chosen milestone-publication UX.
+  states, retry-safe request IDs, and immediate milestone-publication UX.
 - Gate: owner reviews desktop and mobile behavior locally; production still
   uses the old frontend and endpoints.
 
@@ -168,21 +173,18 @@ shutdown of the old Forms requires the applicable later-stage approval.
 - Gate: verify monitoring and rollback, then update documentation from proposed
   behavior to deployed current behavior.
 
-## Open product decision: publishing new milestones
+## Resolved product decision: immediate milestone publication
 
-Turnstile and rate limiting reduce automated abuse but cannot guarantee that
-every accepted submission is trustworthy. Choose one policy before approving
-implementation:
+On 2026-11-09, the owner chose to preserve immediate publication for new
+milestones. After Turnstile verification, server validation, rate limiting,
+deduplication, and a successful Sheets write, the submitter sees the milestone
+optimistically and the generated public tab includes the single canonical row.
+Other visitors see it after Google's published-feed refresh.
 
-1. **Owner review first (recommended):** the Worker appends a new row to
-   `Timeline Source` with an owner-controlled pending status. The generated tab
-   publishes it only after the owner approves it in the private sheet. This
-   prevents both bots and malicious humans from publishing directly.
-2. **Immediate publication:** a valid submission appears automatically, which
-   preserves the current experience but permits any human who passes Turnstile
-   to publish until the owner hides the row.
-
-Edit proposals remain private and manually reviewed under either policy.
+This deliberately accepts a residual risk: a human or sufficiently capable bot
+that passes all controls can publish a milestone until the owner sets `hide=Y`.
+Usage alerts, the emergency submission kill switch, and the owner-controlled
+hide field limit that risk. Edit proposals remain private and manually reviewed.
 
 ## GitHub settings: do now
 
