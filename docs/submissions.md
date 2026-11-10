@@ -115,6 +115,11 @@ repository UI observed on 2026-11-09 is **Rulesets / New branch ruleset**:
    - Turn on **Require conversation resolution before merging**.
    - Leave Code Owner review, dismissal of stale approvals, and approval of the
      most recent push off while this remains a solo repository.
+   - Turn off **Require an additional approval for unattributed Copilot pull
+     requests**. GitHub currently selects this by default, but an additional
+     reviewer should not be required in this solo repository.
+   - Leave all three existing merge methods allowed; changing merge-history
+     style is outside this security rollout.
 10. Leave **Require status checks to pass** off until the CI jobs exist and have
     run at least once.
 11. Keep **Block force pushes** on.

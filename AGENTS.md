@@ -114,7 +114,9 @@ silently start paid usage.
   `Protect master` ruleset with an empty bypass list, target the default branch
   after confirming it is `master`, require pull requests with zero required
   approvals and conversation resolution, restrict deletion, and block force
-  pushes. Do not enable required checks until the jobs exist.
+  pushes. Disable the default extra approval for unattributed Copilot pull
+  requests in this solo repository. Do not enable required checks until the
+  jobs exist.
 - Local development uses staging/test resources only. It must not write to the
   production workbook or modify the current Forms.
 - Merging source to `master` must not deploy production.
