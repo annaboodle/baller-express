@@ -1,6 +1,6 @@
 # Submission security and deployment runbook
 
-Status: approved design; implementation has not started
+Status: proposed design; implementation is awaiting explicit staged approval
 
 Last reviewed: 2026-11-09
 
@@ -30,7 +30,7 @@ Form response spreadsheet CSV ----+
 React forms --> public Google Forms endpoints --> response spreadsheets
 ```
 
-Approved target:
+Proposed target:
 
 ```text
 React form + Turnstile token
@@ -90,6 +90,99 @@ Local development uses:
 No local or staging configuration may reference writable production resources.
 The production Worker and workbook may be provisioned before cutover, but the
 current site must not point to them until the approved production deployment.
+
+## Approval model and staged rollout
+
+Approve the reconciled architecture once, then authorize implementation one
+stage at a time. Completing a stage does not authorize the next stage. Any
+account creation, credential handling, production-data write, deployment, or
+shutdown of the old Forms requires the applicable later-stage approval.
+
+### Stage 0: safety and plan reconciliation
+
+- Completed: create `codex/protected-submissions`, add project memory and this
+  runbook, and activate the `Protect master` GitHub ruleset.
+- Reconcile the older Codex plan with the agreed three-tab workbook and the
+  stage gates in this runbook.
+- Resolve the new-milestone publication decision below.
+- Gate: owner explicitly approves the reconciled architecture and authorizes
+  Stage 1 only.
+
+### Stage 1: local baseline and safety scaffolding
+
+- Reproduce and document the current frontend locally.
+- Replace the stale starter test with meaningful baseline coverage.
+- Scaffold the Worker, request contracts, validation, and tests without cloud
+  credentials or writable external resources.
+- Add non-deploying pull-request CI for tests and production builds.
+- Gate: local behavior is reviewed, all checks pass, and production remains
+  untouched. Then add the proven checks to the `master` ruleset.
+
+### Stage 2: isolated staging backend and workbook
+
+- Create a separate three-tab staging workbook containing only test or
+  sanitized fixture data.
+- Configure free Turnstile test/staging settings, a staging Worker, D1
+  deduplication/rate-limit state, validation, the kill switch, and safe logs.
+- Select and test free notification and usage-alert mechanisms. Do not assume a
+  Sheets API write will invoke a Google Form or `onEdit` trigger; an explicit
+  mechanism such as a time-driven Apps Script poller must be used if Apps Script
+  handles notifications.
+- Gate: privacy, storage, security, notification, and high-usage-alert tests
+  pass without publishing PII or touching production data.
+
+### Stage 3: local frontend integration
+
+- Replace direct Google Form posts in the feature branch with the staging API.
+- Conditionally mount the forms, add Turnstile, validation, loading/error
+  states, retry-safe request IDs, and the chosen milestone-publication UX.
+- Gate: owner reviews desktop and mobile behavior locally; production still
+  uses the old frontend and endpoints.
+
+### Stage 4: migration rehearsal
+
+- Export backups and run a dry-run consolidation into staging.
+- Report source counts, generated IDs, hidden rows, excluded `05/31/1970` spam,
+  legitimate legacy submissions, and the exact public schema.
+- Gate: owner explicitly approves the migration report before any production
+  workbook is populated.
+
+### Stage 5: production infrastructure, still dark
+
+- Create the production workbook, Worker, Turnstile configuration, secrets,
+  notification/alerting mechanism, and manual-only deployment workflow.
+- Test the production Worker directly while the live site still uses its old
+  Google Forms and feeds.
+- Configure the GitHub production environment and deployment approval with the
+  owner.
+- Gate: owner explicitly approves cutover. No merge or production frontend
+  deployment is implied by this stage.
+
+### Stage 6: controlled cutover
+
+- Merge the protected pull request; merging still must not deploy.
+- Record rollback SHAs, manually deploy with approval, and run production smoke
+  tests.
+- Only after successful smoke tests and a final owner confirmation, close the
+  old Forms and unpublish the old PII-bearing feeds.
+- Gate: verify monitoring and rollback, then update documentation from proposed
+  behavior to deployed current behavior.
+
+## Open product decision: publishing new milestones
+
+Turnstile and rate limiting reduce automated abuse but cannot guarantee that
+every accepted submission is trustworthy. Choose one policy before approving
+implementation:
+
+1. **Owner review first (recommended):** the Worker appends a new row to
+   `Timeline Source` with an owner-controlled pending status. The generated tab
+   publishes it only after the owner approves it in the private sheet. This
+   prevents both bots and malicious humans from publishing directly.
+2. **Immediate publication:** a valid submission appears automatically, which
+   preserves the current experience but permits any human who passes Turnstile
+   to publish until the owner hides the row.
+
+Edit proposals remain private and manually reviewed under either policy.
 
 ## GitHub settings: do now
 
