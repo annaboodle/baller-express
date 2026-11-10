@@ -156,8 +156,11 @@ sufficient verification.
 
 ## Known operational gotchas
 
-- Google published data can take a few minutes to refresh. Accepted milestones
-  should be inserted optimistically for the submitter.
+- Google says automatic updates to a published Sheet can take a few minutes.
+  The current app fetches its published CSVs only on page load; the target keeps
+  the same published-CSV mechanism, so other visitors should expect roughly the
+  same delay and must load or refresh after the feed updates. The submitter gets
+  an immediate optimistic insertion in the target experience.
 - Google lets an individual tab be published, but verify in a signed-out browser
   that only `Published Timeline (Generated)` is accessible.
 - Protecting a Google tab cannot remove edit power from the spreadsheet owner.

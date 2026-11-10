@@ -179,7 +179,9 @@ On 2026-11-09, the owner chose to preserve immediate publication for new
 milestones. After Turnstile verification, server validation, rate limiting,
 deduplication, and a successful Sheets write, the submitter sees the milestone
 optimistically and the generated public tab includes the single canonical row.
-Other visitors see it after Google's published-feed refresh.
+Other visitors see it after Google's published-feed refresh and a page load or
+refresh. This is intentionally the same class of delay as production today;
+Google documents that automatic published-Sheet updates can take a few minutes.
 
 This deliberately accepts a residual risk: a human or sufficiently capable bot
 that passes all controls can publish a milestone until the owner sets `hide=Y`.
