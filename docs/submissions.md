@@ -115,7 +115,9 @@ shutdown of the old Forms requires the applicable later-stage approval.
 
 ### Stage 1: local baseline and safety scaffolding
 
-- Reproduce and document the current frontend locally.
+- Install the existing dependencies, run the current checked-out frontend on a
+  local development server, and document its baseline behavior before changing
+  it. The source code is already local; nothing is being recreated.
 - Replace the stale starter test with meaningful baseline coverage.
 - Scaffold the Worker, request contracts, validation, and tests without cloud
   credentials or writable external resources.
