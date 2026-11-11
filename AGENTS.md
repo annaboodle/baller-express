@@ -179,6 +179,12 @@ verification.
 
 ## Known operational gotchas
 
+- Pull-request CI intentionally has no workflow-level `concurrency` group. On
+  2026-11-11 a GitHub webhook incident left a run in a ghost pre-queue state
+  with zero jobs; normal and force cancellation both returned HTTP 409. Because
+  every update to one PR has the same `github.ref`, that ghost occupied the old
+  concurrency group and prevented later runs from materializing jobs. Do not
+  restore PR-level concurrency without first proving the failure mode is gone.
 - Google says automatic updates to a published Sheet can take a few minutes.
   The current app fetches its published CSVs only on page load; the target keeps
   the same published-CSV mechanism, so other visitors should expect roughly the
