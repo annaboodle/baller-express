@@ -63,7 +63,9 @@ owner if needed.
 
 Historical master events use a source such as `legacy_master` and may have blank
 submission/contact metadata. Migrated legitimate form events use
-`legacy_submission`.
+`legacy_submission`. A row from the old add-milestone response sheet is not
+migrated when its legacy `hide` value is `Y`; hidden master rows remain a
+separate migration decision.
 
 ### Published Timeline (Generated)
 
@@ -157,8 +159,9 @@ shutdown of the old Forms requires the applicable later-stage approval.
 ### Stage 4: migration rehearsal
 
 - Export backups and run a dry-run consolidation into staging.
-- Report source counts, generated IDs, hidden rows, excluded `05/31/1970` spam,
-  legitimate legacy submissions, and the exact public schema.
+- Report source counts, generated IDs, master hidden rows, excluded legacy
+  add-milestone rows with `hide=Y`, excluded `05/31/1970` spam, legitimate
+  legacy submissions, and the exact public schema.
 - Gate: owner explicitly approves the migration report before any production
   workbook is populated.
 
@@ -278,8 +281,9 @@ production publication.
    Sheets.
 2. Record the current `master` and `gh-pages` commit SHAs.
 3. Populate the new `Timeline Source` through a dry-run migration.
-4. Exclude hidden rows and the confirmed `05/31/1970` bot submissions; review
-   migration counts before writing.
+4. Exclude add-milestone response rows whose legacy `hide` value is `Y` and the
+   confirmed `05/31/1970` bot submissions. Report master hidden rows separately
+   and review all migration counts before writing.
 5. Verify `Published Timeline (Generated)` in a signed-out browser and confirm
    private tabs cannot be accessed by changing the tab identifier.
 6. Deploy and test the production Worker while the existing website still uses

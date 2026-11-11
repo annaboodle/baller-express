@@ -104,6 +104,9 @@ cutover, and rollback checklist.
   semantic unless the data migration deliberately replaces it everywhere.
 - `hide=Y` is owner-controlled. Never accept `hide`, publication status,
   timestamps, or canonical IDs from the browser.
+- During the legacy migration, do not import rows from the old add-milestone
+  response sheet when that row has `hide=Y`. This rule is specific to that
+  legacy source and does not by itself decide how hidden master rows migrate.
 - `Published Timeline (Generated)` contains no contributor contact data.
 - Turnstile must be verified by the Worker; a client-side widget alone is not a
   trust boundary.
