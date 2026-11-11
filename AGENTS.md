@@ -64,8 +64,8 @@ production forms, Sheets, `master`, or `gh-pages`.
 - `worker/` is a credential-free, fail-closed API foundation with strict request
   validation and mock-adapter tests. It has no Wrangler configuration, cloud
   binding, service credential, or production access.
-- `npm run check` passes locally. Visual desktop/mobile review and a real PR CI
-  run remain Stage 1 gates.
+- `npm run check` passes locally. The owner completed the local visual review on
+  2026-11-11. A real PR CI run remains the Stage 1 gate.
 
 ## Approved target architecture
 

@@ -1,6 +1,6 @@
 # Submission security and deployment runbook
 
-Status: Stage 1 implemented locally; visual review and PR CI are still pending
+Status: Stage 1 local review complete; PR CI is still pending
 
 Last reviewed: 2026-11-11
 
@@ -124,10 +124,10 @@ shutdown of the old Forms requires the applicable later-stage approval.
 - The credential-free Worker foundation fails closed and passes 23 unit tests.
 - Read-only pull-request CI contains no secrets, writes, or deployment steps.
 - `npm run check` passes frontend tests/build and Worker checks/tests.
+- The owner reviewed the running local frontend and confirmed it looked correct.
 
 Remaining before Stage 1 is complete:
 
-- Owner desktop/mobile review of the local frontend.
 - Commit and push the feature branch, then observe the workflow on a real pull
   request without merging it.
 - After all three jobs succeed, guide the owner through adding those exact jobs

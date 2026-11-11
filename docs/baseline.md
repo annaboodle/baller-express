@@ -23,9 +23,9 @@ is integrated. It does not describe the future Worker-backed forms.
   older Create React App stack: Node's `punycode` deprecation and an outdated
   Browserslist database. Neither fails the build.
 
-The in-app browser host was unavailable during the first visual-QA attempt.
-Automated DOM tests and build checks continue, but desktop/mobile visual review
-remains a Stage 1 gate rather than being treated as complete.
+The in-app browser host was unavailable during the automated visual-QA attempt.
+The owner reviewed the running local frontend on 2026-11-11 and confirmed it
+looked correct.
 
 ## Existing runtime behavior
 
