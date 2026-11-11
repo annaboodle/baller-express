@@ -305,7 +305,7 @@ function App() {
       });
 
       return (
-        <>
+        <React.Fragment key={`${date}-${event}-${index}`}>
           {showYear && (
             <div
               className="year-wrap"
@@ -346,7 +346,7 @@ function App() {
               </div>
             </div>
           </div>
-        </>
+        </React.Fragment>
       );
     }
   );
