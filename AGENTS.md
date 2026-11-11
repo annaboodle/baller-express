@@ -51,8 +51,8 @@ project is deployed.
 
 ## Stage 1 branch status
 
-Stage 1 is authorized and implemented on `codex/protected-submissions`. It is
-open as draft pull request [#5](https://github.com/annaboodle/baller-express/pull/5),
+Stage 1 was completed on 2026-11-11 on `codex/protected-submissions`. It is open
+as draft pull request [#5](https://github.com/annaboodle/baller-express/pull/5),
 is not deployed, and has not changed the production forms, Sheets, `master`,
 or `gh-pages`.
 
@@ -66,9 +66,10 @@ or `gh-pages`.
 - `worker/` is a credential-free, fail-closed API foundation with strict request
   validation and mock-adapter tests. It has no Wrangler configuration, cloud
   binding, service credential, or production access.
-- `npm run check` passes locally, the owner completed local visual review on
-  2026-11-11, and draft PR #5 passed all three CI jobs. Adding those exact jobs
-  to the `Protect master` ruleset is the only remaining Stage 1 gate.
+- `npm run check` passes locally, the owner completed local visual review, and
+  draft PR #5 passed all three CI jobs. The owner then enabled those exact jobs
+  as required, up-to-date checks on the `Protect master` ruleset. All Stage 1
+  gates are complete.
 
 ## Approved target architecture
 
@@ -136,16 +137,16 @@ silently start paid usage.
 - Protection was enabled on 2026-11-09 with the active **Protect master**
   ruleset. It targets `master`, has an empty bypass list, requires pull requests
   with zero approvals and conversation resolution, restricts deletion, and
-  blocks force pushes. Required checks were intentionally left off until a real
-  workflow run succeeded; draft PR #5 has now established the three exact job
-  names that are ready to add.
+  blocks force pushes. On 2026-11-11 the owner enabled strict, up-to-date status
+  checks for `Frontend tests`, `Frontend production build`, and `Worker tests
+  and checks` after all three succeeded on draft PR #5.
 - GitHub currently presents this as a repository ruleset. Use an active
   `Protect master` ruleset with an empty bypass list, target the default branch
   after confirming it is `master`, require pull requests with zero required
   approvals and conversation resolution, restrict deletion, and block force
   pushes. Disable the default extra approval for unattributed Copilot pull
-  requests in this solo repository. Do not enable required checks until the
-  jobs exist.
+  requests in this solo repository. Add or rename a required check only after
+  its replacement has succeeded on a real pull request.
 - Local development uses staging/test resources only. It must not write to the
   production workbook or modify the current Forms.
 - Merging source to `master` must not deploy production.

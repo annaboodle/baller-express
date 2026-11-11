@@ -116,7 +116,7 @@ shutdown of the old Forms requires the applicable later-stage approval.
 
 ### Stage 1: local baseline and safety scaffolding
 
-**In progress as of 2026-11-11.** Completed locally and verified on GitHub:
+**Completed 2026-11-11.** Verified locally and on GitHub:
 
 - The existing app compiles, serves HTTP 200 locally, and is documented in
   `docs/baseline.md`.
@@ -129,11 +129,9 @@ shutdown of the old Forms requires the applicable later-stage approval.
   left `master` and `gh-pages` untouched, and its first real CI run passed all
   three jobs: `Frontend tests`, `Frontend production build`, and `Worker tests
   and checks`.
-
-Remaining before Stage 1 is complete:
-
-- Guide the owner through adding those exact three jobs as required checks on
-  the existing `Protect master` ruleset.
+- The owner enabled those exact three jobs as required status checks and
+  enabled the strict up-to-date-branch policy on `Protect master`. The saved
+  ruleset was verified after the change.
 
 ### Stage 2: isolated staging backend and workbook
 
@@ -202,10 +200,11 @@ hide field limit that risk. Edit proposals remain private and manually reviewed.
 
 ## GitHub settings: do now
 
-**Completed 2026-11-09:** the active ruleset **Protect master** applies to one
-target, `master`. Its bypass list is empty. It restricts deletion, requires a
-pull request with zero required approvals and conversation resolution, and
-blocks force pushes. Required status checks remain off until the CI jobs exist.
+**Completed 2026-11-09 and extended 2026-11-11:** the active ruleset **Protect
+master** applies to one target, `master`. Its bypass list is empty. It restricts
+deletion, requires a pull request with zero required approvals and conversation
+resolution, blocks force pushes, and now requires the three proven CI jobs with
+the up-to-date-branch policy enabled.
 
 Protect `master` without changing any Pages or deployment settings. The
 repository UI observed on 2026-11-09 is **Rulesets / New branch ruleset**:
@@ -234,24 +233,24 @@ repository UI observed on 2026-11-09 is **Rulesets / New branch ruleset**:
      reviewer should not be required in this solo repository.
    - Leave all three existing merge methods allowed; changing merge-history
      style is outside this security rollout.
-10. Leave **Require status checks to pass** off until the CI jobs exist and have
-    run at least once.
+10. At initial creation, leave **Require status checks to pass** off until the
+    CI jobs exist and have run at least once.
 11. Keep **Block force pushes** on.
 12. Leave code scanning, code quality, code coverage, and automatic Copilot
     review rules off for now.
 13. Review the rule and select **Create**.
 
-Do not enable required status checks yet; the workflow jobs do not exist and
-GitHub cannot select them until they have run.
+That initial delay was completed on 2026-11-11 after draft PR #5 established
+the check names and passed all three jobs.
 
-## GitHub settings: do after CI exists
+## GitHub settings: completed after CI existed
 
-After the pull-request workflow has run successfully at least once:
+Completed and verified on 2026-11-11:
 
 1. Reopen the `master` protection rule.
 2. Enable **Require status checks to pass before merging**.
-3. Require uniquely named jobs for frontend tests, frontend production build,
-   Worker tests/typecheck, and secret/config validation.
+3. Require `Frontend tests`, `Frontend production build`, and `Worker tests and
+   checks`, all from GitHub Actions.
 4. Enable **Require branches to be up to date before merging**.
 5. Confirm force pushes, deletion, and bypass remain disabled.
 
