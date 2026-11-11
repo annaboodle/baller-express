@@ -1,74 +1,69 @@
-# Welcome to the Baller Express! All aboard!
+# The Baller Express
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app) and deployed using Github Pages.
+The Baller Express is an unlisted-public React timeline of milestones in a
+friend group. The production site is hosted on GitHub Pages.
 
-## Available Scripts
+## Production safety
 
-In the project directory, you can run:
+Source development happens on `codex/protected-submissions`. Production is
+served from the separate `gh-pages` branch, and merging source does not deploy
+the site.
 
-### `npm start`
+Do not run `npm run deploy`, modify `gh-pages`, change GitHub Pages settings, or
+point local code at writable production resources during development. See
+[`AGENTS.md`](AGENTS.md) and
+[`docs/submissions.md`](docs/submissions.md) before making changes.
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Frontend development
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+Install the locked dependencies:
 
-### `npm test`
+```sh
+npm ci
+```
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Start the local development server:
 
-### `npm run build`
+```sh
+npm start
+```
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The app is available at <http://localhost:3000>.
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+Run every local check:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```sh
+npm run check
+```
 
-### `npm run eject`
+The individual frontend commands are `npm run test:ci` and `npm run build`.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Worker foundation
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The credential-free Stage 1 Worker scaffold lives in `worker/`. It must remain
+fail-closed until isolated staging resources are authorized and configured.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```sh
+npm ci --prefix worker
+npm --prefix worker run check
+npm --prefix worker test
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+No production credentials belong in this repository. Development environment
+files are ignored by Git.
 
-### `npm run deploy`
+## Repository layout
 
-Builds application and pushes to a branch called gh-pages, which GitHub uses to link with GitHub Pages.
+- `src/` — current React frontend.
+- `worker/` — submission API foundation and unit tests.
+- `.github/workflows/ci.yml` — non-deploying pull-request checks.
+- `docs/baseline.md` — verified behavior before submission integration.
+- `docs/submissions.md` — staged security, migration, and cutover runbook.
+- `AGENTS.md` — maintained project decisions and invariants.
 
-## Learn More
+## Deployment
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+The repository still contains the legacy laptop-driven `npm run deploy`
+command because production has not been cut over. It is documented for
+historical accuracy, not approved for feature development. A protected,
+manual-only replacement is planned for a later explicitly authorized stage.

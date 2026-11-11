@@ -1,6 +1,6 @@
 # Baller Express project guide
 
-Last reviewed: 2026-11-09
+Last reviewed: 2026-11-11
 
 ## Keep this file alive
 
@@ -49,7 +49,25 @@ project is deployed.
 - The current bot uses `05/31/1970` for milestone dates. This is evidence, not a
   sufficient long-term blocking rule.
 
-## Agreed architecture (implementation not yet authorized)
+## Stage 1 branch status
+
+Stage 1 is authorized and implemented locally on
+`codex/protected-submissions`; it is not deployed and has not changed the
+production forms, Sheets, `master`, or `gh-pages`.
+
+- `src/App.test.js` contains four project-specific baseline tests for feed
+  merging/sorting, hidden rows, approximate dates, type/people filtering, and
+  edit context.
+- `.github/workflows/ci.yml` defines read-only, non-deploying pull-request jobs
+  for frontend tests, the production build, and Worker checks. It has not run on
+  GitHub yet and must not become required until a real PR run succeeds.
+- `worker/` is a credential-free, fail-closed API foundation with strict request
+  validation and mock-adapter tests. It has no Wrangler configuration, cloud
+  binding, service credential, or production access.
+- `npm run check` passes locally. Visual desktop/mobile review and a real PR CI
+  run remain Stage 1 gates.
+
+## Approved target architecture
 
 The target workbook has three tabs:
 
@@ -139,20 +157,19 @@ silently start paid usage.
 Install and start locally:
 
 ```sh
-npm install
+npm ci
 npm start
 ```
 
-Current checks:
+Run all current checks:
 
 ```sh
-CI=true npm test -- --watchAll=false
-npm run build
+npm run check
 ```
 
-The existing test is a stale Create React App starter test and must be replaced
-as part of the submission-security work. A successful build alone is not
-sufficient verification.
+Node.js 20 is the checked-in and CI runtime target. The local machine currently
+uses Node.js 22, which also passes. A successful build alone is not sufficient
+verification.
 
 ## Known operational gotchas
 

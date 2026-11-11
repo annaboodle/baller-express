@@ -1,8 +1,8 @@
 # Submission security and deployment runbook
 
-Status: reconciled proposed design; implementation awaits Stage 1 approval
+Status: Stage 1 implemented locally; visual review and PR CI are still pending
 
-Last reviewed: 2026-11-09
+Last reviewed: 2026-11-11
 
 ## Production safety rule
 
@@ -15,7 +15,8 @@ Verified repository state on 2026-11-09:
 
 - GitHub Pages uses the root of `gh-pages` with the legacy branch deployment.
 - `master` contains source and does not deploy automatically.
-- There is no GitHub Actions workflow.
+- Production `master` has no GitHub Actions workflow. Stage 1 adds a
+  non-deploying pull-request workflow on the feature branch only.
 - `npm run deploy` is the only repository-provided production deployment path.
 
 ## Current and target data flow
@@ -114,6 +115,23 @@ shutdown of the old Forms requires the applicable later-stage approval.
   Stage 1 only.
 
 ### Stage 1: local baseline and safety scaffolding
+
+**In progress as of 2026-11-11.** Completed locally:
+
+- The existing app compiles, serves HTTP 200 locally, and is documented in
+  `docs/baseline.md`.
+- Four frontend baseline tests replace the stale starter assertion.
+- The credential-free Worker foundation fails closed and passes 23 unit tests.
+- Read-only pull-request CI contains no secrets, writes, or deployment steps.
+- `npm run check` passes frontend tests/build and Worker checks/tests.
+
+Remaining before Stage 1 is complete:
+
+- Owner desktop/mobile review of the local frontend.
+- Commit and push the feature branch, then observe the workflow on a real pull
+  request without merging it.
+- After all three jobs succeed, guide the owner through adding those exact jobs
+  as required checks on the existing `Protect master` ruleset.
 
 - Install the existing dependencies, run the current checked-out frontend on a
   local development server, and document its baseline behavior before changing
