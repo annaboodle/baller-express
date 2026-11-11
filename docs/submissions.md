@@ -116,7 +116,7 @@ shutdown of the old Forms requires the applicable later-stage approval.
 
 ### Stage 1: local baseline and safety scaffolding
 
-**In progress as of 2026-11-11.** Completed locally:
+**In progress as of 2026-11-11.** Completed locally and verified on GitHub:
 
 - The existing app compiles, serves HTTP 200 locally, and is documented in
   `docs/baseline.md`.
@@ -125,13 +125,15 @@ shutdown of the old Forms requires the applicable later-stage approval.
 - Read-only pull-request CI contains no secrets, writes, or deployment steps.
 - `npm run check` passes frontend tests/build and Worker checks/tests.
 - The owner reviewed the running local frontend and confirmed it looked correct.
+- Draft pull request [#5](https://github.com/annaboodle/baller-express/pull/5)
+  left `master` and `gh-pages` untouched, and its first real CI run passed all
+  three jobs: `Frontend tests`, `Frontend production build`, and `Worker tests
+  and checks`.
 
 Remaining before Stage 1 is complete:
 
-- Commit and push the feature branch, then observe the workflow on a real pull
-  request without merging it.
-- After all three jobs succeed, guide the owner through adding those exact jobs
-  as required checks on the existing `Protect master` ruleset.
+- Guide the owner through adding those exact three jobs as required checks on
+  the existing `Protect master` ruleset.
 
 ### Stage 2: isolated staging backend and workbook
 
