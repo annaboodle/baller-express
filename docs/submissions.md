@@ -133,16 +133,6 @@ Remaining before Stage 1 is complete:
 - After all three jobs succeed, guide the owner through adding those exact jobs
   as required checks on the existing `Protect master` ruleset.
 
-- Install the existing dependencies, run the current checked-out frontend on a
-  local development server, and document its baseline behavior before changing
-  it. The source code is already local; nothing is being recreated.
-- Replace the stale starter test with meaningful baseline coverage.
-- Scaffold the Worker, request contracts, validation, and tests without cloud
-  credentials or writable external resources.
-- Add non-deploying pull-request CI for tests and production builds.
-- Gate: local behavior is reviewed, all checks pass, and production remains
-  untouched. Then add the proven checks to the `master` ruleset.
-
 ### Stage 2: isolated staging backend and workbook
 
 - Create a separate three-tab staging workbook containing only test or
