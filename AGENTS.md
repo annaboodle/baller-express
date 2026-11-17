@@ -1,6 +1,6 @@
 # Baller Express project guide
 
-Last reviewed: 2026-11-16
+Last reviewed: 2026-11-17
 
 ## Keep this file alive
 
@@ -74,7 +74,7 @@ or `gh-pages`.
 ## Stage 2 branch status
 
 Stage 2 is in progress on `codex/protected-submissions` and remains isolated
-from production. Nothing in this section is deployed, and the live site,
+from production. A disabled staging-only Worker is deployed, but the live site,
 production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
 
 - The private native Google Sheet **Baller Express — Stage 2 Staging** has the
@@ -113,12 +113,25 @@ production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
 - The owner-only Apps Script source polls private edit proposals and aggregate
   Worker alerts every five minutes, reserves mail quota, retries safely, and
   independently reports a repeated Worker/D1 polling outage.
-- `npm --prefix worker test` currently passes 64 tests; the D1 migration also
+- Three independent keyed staging secrets were generated into the ignored,
+  owner-only local secret store. Wrangler declares exactly seven required
+  server secrets. A tested filter creates an owner-only upload file containing
+  only those seven values and excludes the public Turnstile site key.
+- The Worker was deployed to Cloudflare staging on 2026-11-17 with
+  `SUBMISSIONS_ENABLED=false`, localhost-only CORS, the staging D1 binding, no
+  custom domain, and no production route. The temporary secret-upload file was
+  deleted immediately. All six D1 application tables remained empty, and the
+  staging workbook retained exactly its four milestone fixtures and one edit
+  fixture.
+- The account still needs its free `workers.dev` subdomain registered before
+  the deployed Worker URL can complete TLS and live kill-switch smoke tests.
+- `npm --prefix worker test` currently passes 76 tests; the D1 migration also
   loads successfully in SQLite. Local and exported-native workbook formula and
   visual checks pass.
-- Still pending before the Stage 2 gate: the remaining staging Worker setup,
-  the remaining Worker secrets, Apps Script authorization, and real staging
-  smoke/privacy/kill-switch/notification/high-usage tests.
+- Still pending before the Stage 2 gate: register the free account-level
+  `workers.dev` subdomain, complete disabled-route smoke tests, install and
+  authorize Apps Script, and run real staging
+  privacy/kill-switch/notification/high-usage tests.
 
 ## Approved target architecture
 

@@ -2,7 +2,7 @@
 
 Status: Stage 1 complete; Stage 2 isolated staging implementation in progress
 
-Last reviewed: 2026-11-16
+Last reviewed: 2026-11-17
 
 ## Production safety rule
 
@@ -119,7 +119,8 @@ date/description/people snapshots are never used as identity.
 Completed on the isolated staging workbook:
 
 - Spreadsheet timezone is `Etc/UTC`.
-- Only the owner currently has Drive permission; the workbook is not published.
+- The owner and one staging-only service account have Drive permission; General
+  access remains Restricted and the workbook is not published.
 - The whole `Published Timeline (Generated)` tab is protected.
 - `Timeline Source!N:N` is protected because it is formula-owned.
 - The source rank and public projection are open-ended spill formulas, avoiding
@@ -130,10 +131,10 @@ Completed on the isolated staging workbook:
   fixture remains literal text, and the generated tab contains only seven
   public columns.
 
-After provisioning, share this workbook with exactly one staging-only Google
-service account. That account must have no access to either production
-spreadsheet. Do not publish the generated tab until the signed-out privacy test
-is ready; publishing is not required for Worker storage tests.
+The workbook is shared with exactly one staging-only Google service account;
+that account has no intended access to either production spreadsheet. Do not
+publish the generated tab until the signed-out privacy test is ready;
+publishing is not required for Worker storage tests.
 
 ## Development isolation
 
@@ -190,7 +191,7 @@ shutdown of the old Forms requires the applicable later-stage approval.
 
 ### Stage 2: isolated staging backend and workbook
 
-In progress as of 2026-11-16.
+In progress as of 2026-11-17.
 
 Completed locally or in the private staging workbook:
 
@@ -214,6 +215,17 @@ Completed locally or in the private staging workbook:
   Drive-confirmed workbook ID only in ignored local configuration. A live
   read-only check verified service-account authentication, workbook access, and
   both private tab schemas without writing any cell.
+- Generated three independent keyed secrets into ignored, owner-only storage;
+  declared exactly seven required server secrets in Wrangler; and added tested
+  helpers that generate missing keyed values and prepare a seven-key filtered
+  deployment file without displaying any value or uploading the public
+  Turnstile site key.
+- Deployed the staging Worker with `SUBMISSIONS_ENABLED=false`, localhost-only
+  CORS, no custom domain, and no production route. The temporary filtered
+  secret file was deleted immediately after deployment. A read-only D1 audit
+  confirmed that all six application/telemetry tables remained empty, and a
+  bounded Sheet read confirmed the workbook retained exactly its four
+  milestone fixtures and one edit fixture.
 - Implemented fail-closed Turnstile, D1 rate limiting/idempotency/deduplication,
   exact Sheets schemas, RAW writes, partial-commit reconciliation, timeouts,
   safe public responses, and the emergency switch.
@@ -223,13 +235,14 @@ Completed locally or in the private staging workbook:
   IDs, and a new milestone's seven already-public fields for safe replay; no
   contributor contact, private edit-proposal text, raw IP, token, or raw error
   string enters D1 or an aggregate alert response.
-- Verified 64 Worker tests, the SQL migration, workbook formulas, private/public
+- Verified 76 Worker tests, the SQL migration, workbook formulas, private/public
   projection, and exported-native workbook renders.
 
 Pending owner-guided staging setup and real-provider tests:
 
-- Finish the staging Worker setup and configure the remaining Worker secrets.
-- Deploy the Worker to `workers.dev` with no custom or production route.
+- Register the free account-level `workers.dev` subdomain so the already
+  deployed staging route can complete TLS, then run the disabled-route smoke
+  tests.
 - Install/authorize the Apps Script, run storage/privacy/security/notification
   tests, trigger a real high-usage alert, and exercise the kill switch.
 
@@ -272,30 +285,39 @@ or broader sharing than listed here.
    an editor. Confirm the two production spreadsheets are not shared with it.
 7. Store the Turnstile secret, three independent keyed secrets, Google service
    account email/private key, and staging spreadsheet ID through Wrangler
-   secrets. Never paste them into tracked files, documentation, or chat.
+   secrets. Never paste them into tracked files, documentation, or chat. The
+   ignored local file must remain mode `600`; use the tested filter to upload
+   exactly the seven required server secrets and exclude `TURNSTILE_SITE_KEY`.
 8. Keep `SUBMISSIONS_ENABLED=false`; deploy only to the staging `workers.dev`
-   hostname with no custom route.
-9. In the staging workbook's owner-bound Apps Script project, install
+   hostname with no custom route. Delete the exact temporary secret-upload file
+   immediately after the deployment attempt. This deployment completed on
+   2026-11-17; the switch remained off and post-deploy D1/Sheet counts matched
+   the untouched fixture baseline.
+9. If the Cloudflare account has never used Workers before, register its free
+   account-level `workers.dev` subdomain under **Compute > Workers & Pages >
+   Your subdomain**. This does not connect the production custom domain. Wait
+   for TLS/DNS to become available before interpreting smoke-test failures.
+10. In the staging workbook's owner-bound Apps Script project, install
    `worker/apps-script/Code.gs`. Set the four Script Properties documented in
    `worker/apps-script/README.md`, validate configuration, authorize the minimum
    Sheet/HTTPS/mail scopes, and install its single five-minute trigger.
-10. With the switch still off, prove public submission routes return the safe
+11. With the switch still off, prove public submission routes return the safe
     unavailable response, do not write Sheets, and do not record usage.
-11. Enable the switch briefly and run fictional milestone/edit-proposal smoke
+12. Enable the switch briefly and run fictional milestone/edit-proposal smoke
     tests. Verify exact A:M writes, the retained `publish_rank` formula, one
     generated public row, private contact isolation, and owner email delivery.
-12. Test replay, request-ID conflict, contact-independent duplicate detection,
+13. Test replay, request-ID conflict, contact-independent duplicate detection,
     the observed three-request bot burst, wrong-origin and malformed requests,
     schema drift, upstream timeouts, and formula-like literal text.
-13. Trigger and receive one real 100-attempt/10-minute aggregate alert. Verify
+14. Trigger and receive one real 100-attempt/10-minute aggregate alert. Verify
     no contributor contact, private edit-proposal text, raw IP, token, or raw
     error string appears in D1, Worker logs, the aggregate alert API, Script
     Properties, or the aggregate alert email. Test the owner-side
     outage/recovery path separately.
-14. Exercise the kill switch while staging is enabled and confirm new attempts
+15. Exercise the kill switch while staging is enabled and confirm new attempts
     fail before rate limiting, Turnstile, Sheets, or telemetry. Leave staging
     disabled after testing.
-15. Record resource names, non-secret settings, test results, and teardown/key
+16. Record resource names, non-secret settings, test results, and teardown/key
     rotation steps here. Stage 3 remains unauthorized until the Stage 2 gate is
     explicitly accepted.
 

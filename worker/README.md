@@ -130,7 +130,9 @@ Secrets/private identifiers are set through Wrangler secrets or ignored local
 
 The three keyed secrets must be independent and contain at least 32 random
 characters. The staging Google service account may access only the staging
-workbook.
+workbook. The Wrangler configuration declares exactly these seven names as
+required so local development ignores unrelated entries and deployment fails
+closed if any required secret is absent.
 
 To import a downloaded staging service-account JSON key without printing its
 contents, run `scripts/import-google-service-account.mjs` with `--input`,
@@ -138,6 +140,17 @@ contents, run `scripts/import-google-service-account.mjs` with `--input`,
 identity and PKCS#8 key, refuses to overwrite existing Google credentials, and
 writes the ignored `.dev.vars` atomically with owner-only permissions. Delete
 the downloaded JSON after the import and a no-secret authentication check.
+
+Run `scripts/generate-staging-keyed-secrets.mjs` to generate any missing
+`RATE_LIMIT_SECRET`, `REQUEST_HASH_SECRET`, and `ALERT_POLL_SECRET` values. It
+never prints or replaces a value, requires independent secrets of at least 32
+characters, and preserves owner-only permissions on `.dev.vars`.
+
+Before a staging deploy, run `scripts/prepare-staging-deploy-secrets.mjs`. It
+creates an owner-only, ignored `local-secrets/staging-deploy.env` containing
+exactly the seven required server secrets and excludes the public Turnstile
+site key. Wrangler can consume that filtered file with `--secrets-file`; delete
+the exact temporary file immediately after the deploy attempt.
 
 ## Staging provisioning boundary
 

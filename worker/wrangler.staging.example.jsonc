@@ -3,6 +3,17 @@
   "main": "src/index.js",
   "compatibility_date": "2026-11-11",
   "workers_dev": true,
+  "secrets": {
+    "required": [
+      "TURNSTILE_SECRET_KEY",
+      "RATE_LIMIT_SECRET",
+      "REQUEST_HASH_SECRET",
+      "ALERT_POLL_SECRET",
+      "GOOGLE_SERVICE_ACCOUNT_EMAIL",
+      "GOOGLE_PRIVATE_KEY",
+      "GOOGLE_SHEETS_SPREADSHEET_ID"
+    ]
+  },
   "vars": {
     "ALLOWED_ORIGIN": "http://localhost:3000",
     "SUBMISSIONS_ENABLED": "false",
