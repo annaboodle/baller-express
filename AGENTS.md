@@ -89,6 +89,18 @@ production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
   on 2026-11-16 in Managed mode, world region, with no pre-clearance and only
   `localhost` allowed. Its keys are kept only in the ignored local `.dev.vars`,
   which has owner-only file permissions.
+- The dedicated Google Cloud project **Baller Express Stage 2 Staging**
+  (`baller-express-stage-2-staging`) was created on 2026-11-16 under **No
+  organization**. Its Billing page explicitly reports that the project has no
+  billing account; do not link one. Only the Google Sheets API has been enabled.
+- The staging service account **Baller Express Stage 2 Worker** was created with
+  no Google Cloud project role and no additional principal access. One JSON key
+  was validated and imported into the ignored, owner-only local secret store;
+  the downloaded JSON was permanently deleted. The staging workbook is shared
+  with that account as Editor, its General access remains Restricted, and Drive
+  metadata confirmed only the intended staging file ID for ignored local use.
+  A live read-only check then verified service-account authentication, workbook
+  access, and both private tab schemas without writing any cell.
 - The entire generated tab, `Timeline Source!N:N`, and
   `Edit Proposals!N:Q` are protected so future non-owner editors cannot alter
   generated formulas, notification timestamps, or review decisions.
@@ -104,9 +116,8 @@ production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
 - `npm --prefix worker test` currently passes 64 tests; the D1 migration also
   loads successfully in SQLite. Local and exported-native workbook formula and
   visual checks pass.
-- Still pending before the Stage 2 gate: the remaining staging Worker setup, a
-  Google project with no billing account, a staging-only service account, the
-  remaining Worker secrets, Apps Script authorization, and real staging
+- Still pending before the Stage 2 gate: the remaining staging Worker setup,
+  the remaining Worker secrets, Apps Script authorization, and real staging
   smoke/privacy/kill-switch/notification/high-usage tests.
 
 ## Approved target architecture

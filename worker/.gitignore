@@ -4,3 +4,4 @@ coverage/
 !.dev.vars.example
 .wrangler/
 wrangler.staging.jsonc
+local-secrets/

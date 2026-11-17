@@ -7,7 +7,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "check": "node --check src/*.js && node --check src/adapters/*.js && node --check src/alerts/*.js",
+    "check": "node --check src/*.js && node --check src/adapters/*.js && node --check src/alerts/*.js && node --check scripts/*.mjs",
     "test": "node --test test/*.test.js"
   }
 }

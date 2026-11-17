@@ -202,6 +202,18 @@ Completed locally or in the private staging workbook:
 - Created the free Turnstile widget **Baller Express Submissions - Staging** in
   Managed mode, world region, with pre-clearance disabled and only `localhost`
   allowed. Its keys remain in the ignored, owner-readable local secrets file.
+- Created the dedicated Google Cloud project **Baller Express Stage 2 Staging**
+  (`baller-express-stage-2-staging`) under **No organization** and verified on
+  its Billing page that no billing account is linked. Enabled only the Google
+  Sheets API.
+- Created the service account **Baller Express Stage 2 Worker** with no Google
+  Cloud project role and no additional principal access. Validated and imported
+  one JSON key into the ignored, owner-only local secret store, then permanently
+  deleted the downloaded JSON. Shared only the staging workbook with that
+  account as Editor while keeping General access Restricted, and stored the
+  Drive-confirmed workbook ID only in ignored local configuration. A live
+  read-only check verified service-account authentication, workbook access, and
+  both private tab schemas without writing any cell.
 - Implemented fail-closed Turnstile, D1 rate limiting/idempotency/deduplication,
   exact Sheets schemas, RAW writes, partial-commit reconciliation, timeouts,
   safe public responses, and the emergency switch.
@@ -216,8 +228,7 @@ Completed locally or in the private staging workbook:
 
 Pending owner-guided staging setup and real-provider tests:
 
-- Finish the staging Worker setup and create a no-billing Google project.
-- Share only the staging workbook with a staging-only service account.
+- Finish the staging Worker setup and configure the remaining Worker secrets.
 - Deploy the Worker to `workers.dev` with no custom or production route.
 - Install/authorize the Apps Script, run storage/privacy/security/notification
   tests, trigger a real high-usage alert, and exercise the kill switch.

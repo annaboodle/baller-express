@@ -132,6 +132,13 @@ The three keyed secrets must be independent and contain at least 32 random
 characters. The staging Google service account may access only the staging
 workbook.
 
+To import a downloaded staging service-account JSON key without printing its
+contents, run `scripts/import-google-service-account.mjs` with `--input`,
+`--project`, and `--service-account`. The importer verifies the exact staging
+identity and PKCS#8 key, refuses to overwrite existing Google credentials, and
+writes the ignored `.dev.vars` atomically with owner-only permissions. Delete
+the downloaded JSON after the import and a no-secret authentication check.
+
 ## Staging provisioning boundary
 
 Do not deploy the example configuration. For an isolated staging setup:
