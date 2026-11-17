@@ -25,6 +25,7 @@ export function validEditProposal(overrides = {}) {
     requestId: "223e4567-e89b-42d3-a456-426614174000",
     turnstileToken: "test-turnstile-token",
     original: {
+      eventId: "event-existing-1",
       date: "2020-01-02",
       description: "Alice and Bob met",
       people: ["Alice", "Bob"],

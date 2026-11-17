@@ -1,4 +1,6 @@
 node_modules/
 coverage/
-.dev.vars
+.dev.vars*
+!.dev.vars.example
 .wrangler/
+wrangler.staging.jsonc

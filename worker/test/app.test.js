@@ -366,6 +366,14 @@ test("returns clear duplicate and request-ID conflict outcomes", async () => {
   assert.equal(duplicate.status, 409);
   assert.equal(conflict.status, 409);
   assert.equal(
+    duplicate.headers.get("access-control-allow-origin"),
+    enabledEnv.ALLOWED_ORIGIN,
+  );
+  assert.equal(
+    conflict.headers.get("access-control-allow-origin"),
+    enabledEnv.ALLOWED_ORIGIN,
+  );
+  assert.equal(
     (await responseJson(duplicate)).error.code,
     "duplicate_submission",
   );

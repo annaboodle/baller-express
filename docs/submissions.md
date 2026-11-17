@@ -1,8 +1,8 @@
 # Submission security and deployment runbook
 
-Status: Stage 1 local review complete; PR CI is still pending
+Status: Stage 1 complete; Stage 2 isolated staging implementation in progress
 
-Last reviewed: 2026-11-11
+Last reviewed: 2026-11-16
 
 ## Production safety rule
 
@@ -52,9 +52,29 @@ Edit form --> Worker --> Edit Proposals (private) --> owner email
 
 ### Timeline Source
 
-Private canonical timeline. Expected fields include the public event fields plus
-`event_id`, `hide`, `source`, `submitted_at`, `submission_id`, and optional
-private contributor name/email.
+Private canonical timeline. Its exact positional contract is A:N:
+
+| Column | Field | Owner |
+| --- | --- | --- |
+| A | `event_id` | Worker/owner-generated |
+| B | `date` | ISO `YYYY-MM-DD` text |
+| C | `precise` | `Y` or `N` |
+| D | `event` | validated literal text |
+| E | `people` | validated comma-separated names |
+| F | `type` | validated milestone type |
+| G | `size` | Worker default `m` for submissions |
+| H | `hide` | Worker default `N`, then owner-controlled |
+| I | `source` | Worker/owner-controlled |
+| J | `submitted_at` | numeric Google Sheets UTC timestamp |
+| K | `submission_id` | Worker-generated |
+| L | `contributor_name` | optional private value |
+| M | `contributor_email` | optional private value |
+| N | `publish_rank` | generated Sheet formula |
+
+The Worker appends exactly A:M using `valueInputOption=RAW` and never writes
+column N. Individual names cannot contain commas, making the stored people list
+reversible. Cell N2 owns a single open-ended spill formula, so a newly appended
+row receives a rank without relying on a fixed prefilled range.
 
 For a valid new milestone, the Worker appends one row with the owner-controlled
 default `hide=N`. It never accepts `hide` from the browser. The row therefore
@@ -75,13 +95,45 @@ reads only its CSV.
 
 Expected public fields are `event_id`, `date`, `precise`, `event`, `people`,
 `type`, and `size`. Do not include contributor contact data or submission
-metadata.
+metadata. Cell A2 owns one open-ended `FILTER` projection; the remaining public
+cells are generated spill results rather than independently editable formulas.
 
 ### Edit Proposals
 
-Private queue containing the original milestone reference, requested fields,
-requested change, optional contributor contact data, timestamps, and email
-notification status.
+Private queue with the exact A:Q contract:
+
+`proposal_id`, `submission_id`, `source`, `submitted_at`,
+`original_event_id`, `original_date`, `original_description`,
+`original_people`, `fields`, `requested_change`, `contributor_name`,
+`contributor_email`, `notification_status`, `notified_at`, `review_status`,
+`reviewed_at`, `reviewer_notes`.
+
+The Worker appends A:M and initializes `notification_status=PENDING`. The
+owner-side notification and review process owns N:Q. Notification status may be
+`PENDING`, `RETRY`, `SENT`, `FAILED`, or `SKIPPED`; review status is independent.
+Every proposal must include the immutable `event_id` of its existing target so
+date/description/people snapshots are never used as identity.
+
+### Staging workbook hardening
+
+Completed on the isolated staging workbook:
+
+- Spreadsheet timezone is `Etc/UTC`.
+- Only the owner currently has Drive permission; the workbook is not published.
+- The whole `Published Timeline (Generated)` tab is protected.
+- `Timeline Source!N:N` is protected because it is formula-owned.
+- The source rank and public projection are open-ended spill formulas, avoiding
+  a silent publication limit when the Sheet grows beyond its initial row count.
+- `Edit Proposals!N:Q` is protected because those columns are owner-controlled.
+- Formula scans, native-Sheet export inspection, and renders of all three tabs
+  pass. The hidden fixture is absent from the generated tab, the formula-like
+  fixture remains literal text, and the generated tab contains only seven
+  public columns.
+
+After provisioning, share this workbook with exactly one staging-only Google
+service account. That account must have no access to either production
+spreadsheet. Do not publish the generated tab until the signed-out privacy test
+is ready; publishing is not required for Worker storage tests.
 
 ## Development isolation
 
@@ -91,7 +143,8 @@ Local development uses:
 
 - Frontend at `http://localhost:3000`.
 - Worker at `http://localhost:8787`.
-- Cloudflare Turnstile test keys.
+- A dedicated free staging Turnstile widget that allows `localhost`; Cloudflare
+  dummy keys cannot prove this Worker's required hostname and action checks.
 - A separate staging workbook containing test or sanitized fixture data.
 - Development-only environment files that are ignored by Git.
 
@@ -137,16 +190,89 @@ shutdown of the old Forms requires the applicable later-stage approval.
 
 ### Stage 2: isolated staging backend and workbook
 
-- Create a separate three-tab staging workbook containing only test or
-  sanitized fixture data.
-- Configure free Turnstile test/staging settings, a staging Worker, D1
-  deduplication/rate-limit state, validation, the kill switch, and safe logs.
-- Select and test free notification and usage-alert mechanisms. Do not assume a
-  Sheets API write will invoke a Google Form or `onEdit` trigger; an explicit
-  mechanism such as a time-driven Apps Script poller must be used if Apps Script
-  handles notifications.
+In progress as of 2026-11-16.
+
+Completed locally or in the private staging workbook:
+
+- Created and hardened the three-tab native staging workbook with fictional
+  fixtures only.
+- Implemented fail-closed Turnstile, D1 rate limiting/idempotency/deduplication,
+  exact Sheets schemas, RAW writes, partial-commit reconciliation, timeouts,
+  safe public responses, and the emergency switch.
+- Implemented aggregate-only D1 telemetry, alert cooldown/outbox/lease state,
+  HMAC-authenticated internal alert endpoints, retention cleanup, and an
+  owner-only Apps Script poller. D1 retains keyed fingerprints, server-owned
+  IDs, and a new milestone's seven already-public fields for safe replay; no
+  contributor contact, private edit-proposal text, raw IP, token, or raw error
+  string enters D1 or an aggregate alert response.
+- Verified 64 Worker tests, the SQL migration, workbook formulas, private/public
+  projection, and exported-native workbook renders.
+
+Pending owner-guided staging setup and real-provider tests:
+
+- Create free Cloudflare staging resources and a no-billing Google project.
+- Share only the staging workbook with a staging-only service account.
+- Deploy the Worker to `workers.dev` with no custom or production route.
+- Install/authorize the Apps Script, run storage/privacy/security/notification
+  tests, trigger a real high-usage alert, and exercise the kill switch.
+
+Do not assume a Sheets API write invokes a Google Form or `onEdit` trigger. The
+time-driven Apps Script poller is the explicit notification mechanism.
+
 - Gate: privacy, storage, security, notification, and high-usage-alert tests
   pass without publishing PII or touching production data.
+
+#### Stage 2 owner walkthrough
+
+Work through this together with the owner; stop at any screen that asks for a
+paid plan, pay-as-you-go enrollment, a billing account, a production resource,
+or broader sharing than listed here.
+
+1. In Cloudflare, confirm the account is on **Workers Free**. Do not upgrade.
+2. Create one staging D1 database named
+   `baller-express-submissions-staging`. Copy
+   `worker/wrangler.staging.example.jsonc` to the ignored
+   `worker/wrangler.staging.jsonc`, then replace only its staging D1 placeholder.
+3. Apply `worker/migrations/0001_stage2.sql` to that remote staging database.
+4. Create one free staging-only Turnstile widget with only the required
+   staging/local hostnames. Use that real staging widget for end-to-end tests:
+   Cloudflare's dummy success response always uses `example.com` and omits the
+   action, so dummy keys cannot pass the Worker's strict hostname/action checks.
+   See Cloudflare's official
+   [testing behavior](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
+5. In Google Cloud, create a dedicated staging project with **no billing account
+   attached**, enable only the Google Sheets API, and create one staging-only
+   service account and key.
+6. Share only **Baller Express — Stage 2 Staging** with that service account as
+   an editor. Confirm the two production spreadsheets are not shared with it.
+7. Store the Turnstile secret, three independent keyed secrets, Google service
+   account email/private key, and staging spreadsheet ID through Wrangler
+   secrets. Never paste them into tracked files, documentation, or chat.
+8. Keep `SUBMISSIONS_ENABLED=false`; deploy only to the staging `workers.dev`
+   hostname with no custom route.
+9. In the staging workbook's owner-bound Apps Script project, install
+   `worker/apps-script/Code.gs`. Set the four Script Properties documented in
+   `worker/apps-script/README.md`, validate configuration, authorize the minimum
+   Sheet/HTTPS/mail scopes, and install its single five-minute trigger.
+10. With the switch still off, prove public submission routes return the safe
+    unavailable response, do not write Sheets, and do not record usage.
+11. Enable the switch briefly and run fictional milestone/edit-proposal smoke
+    tests. Verify exact A:M writes, the retained `publish_rank` formula, one
+    generated public row, private contact isolation, and owner email delivery.
+12. Test replay, request-ID conflict, contact-independent duplicate detection,
+    the observed three-request bot burst, wrong-origin and malformed requests,
+    schema drift, upstream timeouts, and formula-like literal text.
+13. Trigger and receive one real 100-attempt/10-minute aggregate alert. Verify
+    no contributor contact, private edit-proposal text, raw IP, token, or raw
+    error string appears in D1, Worker logs, the aggregate alert API, Script
+    Properties, or the aggregate alert email. Test the owner-side
+    outage/recovery path separately.
+14. Exercise the kill switch while staging is enabled and confirm new attempts
+    fail before rate limiting, Turnstile, Sheets, or telemetry. Leave staging
+    disabled after testing.
+15. Record resource names, non-secret settings, test results, and teardown/key
+    rotation steps here. Stage 3 remains unauthorized until the Stage 2 gate is
+    explicitly accepted.
 
 ### Stage 3: local frontend integration
 
@@ -310,9 +436,27 @@ production publication.
 ## Cost and usage safeguards
 
 - Keep Cloudflare Workers, D1, and Turnstile on free plans with no automatic
-  upgrade.
+  upgrade. As checked on 2026-11-16, Workers Free has a hard daily request
+  limit, D1 Free stops queries at its daily/storage limits instead of billing
+  overage, and Turnstile Free includes unlimited challenges. Recheck the
+  official [Workers limits](https://developers.cloudflare.com/workers/platform/limits/),
+  [D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/), and
+  [Turnstile plans](https://developers.cloudflare.com/turnstile/plans/) before
+  provisioning.
 - Avoid attaching a Google billing account; if a future Google requirement
   makes that unavoidable, stop and obtain explicit owner approval.
+- Standard Sheets API use is currently free, but Google says exceeding request
+  quotas is planned to become chargeable later in 2026 when a billing account
+  is linked. Keep the staging project unbilled, do not request higher quotas,
+  and recheck the official [Sheets API limits](https://developers.google.com/workspace/sheets/api/limits).
 - Alert on 100 attempts in 10 minutes, 1,000 attempts in 24 hours, 50 accepted
   submissions in 24 hours, or repeated upstream failures.
+- Aggregate counts use one-minute D1 buckets with 48-hour retention. Request
+  replay records and delivered alert state retain 30 days; stale undelivered
+  alert rows retain at most 90 days. Cleanup runs during the five-minute owner
+  alert poll.
+- The owner Apps Script checks `MailApp.getRemainingDailyQuota()` and reserves
+  ten messages. Reaching a quota leaves notifications queued; it never switches
+  to a paid mail service. Recheck the official
+  [Apps Script quotas](https://developers.google.com/apps-script/guides/services/quotas).
 - Prefer safe submission failure over paid overage or silent degradation.

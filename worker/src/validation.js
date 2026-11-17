@@ -7,6 +7,7 @@ import {
 
 const REQUEST_ID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const EVENT_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function isPlainObject(value) {
@@ -66,6 +67,20 @@ function validateToken(value) {
   return null;
 }
 
+function validateEventId(value, field = "original.eventId") {
+  const normalized = normalizedString(value);
+  if (normalized === null || !EVENT_ID_PATTERN.test(normalized)) {
+    return {
+      issue: issue(
+        field,
+        "invalid_event_id",
+        `${field} must identify an existing milestone.`,
+      ),
+    };
+  }
+  return { value: normalized };
+}
+
 function validateIsoDate(value, field = "date") {
   if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     return issue(field, "invalid_date", `${field} must use YYYY-MM-DD.`);
@@ -104,6 +119,15 @@ function validatePeople(value, field = "people") {
   for (const person of value) {
     const result = validateText(person, field, { min: 1, max: 80 });
     if (result.issue) return { issue: result.issue };
+    if (result.value.includes(",")) {
+      return {
+        issue: issue(
+          field,
+          "invalid_person_delimiter",
+          `${field} entries cannot contain commas.`,
+        ),
+      };
+    }
     const key = result.value.toLocaleLowerCase("en-US");
     if (seen.has(key)) {
       return {
@@ -234,7 +258,11 @@ export function validateEditProposal(payload) {
 
   let original;
   if (isPlainObject(payload.original)) {
-    const originalDateIssue = validateIsoDate(payload.original.date, "original.date");
+    const originalEventId = validateEventId(payload.original.eventId);
+    const originalDateIssue = validateIsoDate(
+      payload.original.date,
+      "original.date",
+    );
     const originalDescription = validateText(
       payload.original.description,
       "original.description",
@@ -245,22 +273,26 @@ export function validateEditProposal(payload) {
       "original.people",
     );
     const originalUnknown = rejectUnknownFields(payload.original, [
+      "eventId",
       "date",
       "description",
       "people",
     ]);
     issues.push(...originalUnknown);
+    if (originalEventId.issue) issues.push(originalEventId.issue);
     if (originalDateIssue) issues.push(originalDateIssue);
     if (originalDescription.issue) issues.push(originalDescription.issue);
     if (originalPeople.issue) issues.push(originalPeople.issue);
 
     if (
+      !originalEventId.issue &&
       !originalDateIssue &&
       !originalDescription.issue &&
       !originalPeople.issue &&
       originalUnknown.length === 0
     ) {
       original = {
+        eventId: originalEventId.value,
         date: payload.original.date,
         description: originalDescription.value,
         people: originalPeople.value,
@@ -283,7 +315,7 @@ export function validateEditProposal(payload) {
       ),
     );
   } else {
-    fields = [...payload.fields];
+    fields = EDIT_FIELDS.filter((field) => payload.fields.includes(field));
   }
 
   const requestedChange = validateText(

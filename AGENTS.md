@@ -1,6 +1,6 @@
 # Baller Express project guide
 
-Last reviewed: 2026-11-11
+Last reviewed: 2026-11-16
 
 ## Keep this file alive
 
@@ -63,13 +63,42 @@ or `gh-pages`.
   for `Frontend tests`, `Frontend production build`, and `Worker tests and
   checks`. All three succeeded in the first real pull-request run on
   2026-11-11.
-- `worker/` is a credential-free, fail-closed API foundation with strict request
-  validation and mock-adapter tests. It has no Wrangler configuration, cloud
-  binding, service credential, or production access.
+- At Stage 1 completion, `worker/` was a credential-free, fail-closed API
+  foundation with strict validation and mock-adapter tests. Stage 2 additions
+  are tracked separately below.
 - `npm run check` passes locally, the owner completed local visual review, and
   draft PR #5 passed all three CI jobs. The owner then enabled those exact jobs
   as required, up-to-date checks on the `Protect master` ruleset. All Stage 1
   gates are complete.
+
+## Stage 2 branch status
+
+Stage 2 is in progress on `codex/protected-submissions` and remains isolated
+from production. Nothing in this section is deployed, and the live site,
+production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
+
+- The private native Google Sheet **Baller Express — Stage 2 Staging** has the
+  approved three tabs, fictional fixture data only, and timezone `Etc/UTC`.
+  It remains owner-only until a staging-only service account is created.
+- The entire generated tab, `Timeline Source!N:N`, and
+  `Edit Proposals!N:Q` are protected so future non-owner editors cannot alter
+  generated formulas, notification timestamps, or review decisions.
+- The native workbook uses one open-ended `ARRAYFORMULA` for `publish_rank` and
+  one open-ended `FILTER` projection for the public tab, so accepted rows are
+  not limited by a prefilled formula range.
+- The local Worker now has staging-only D1, Turnstile, Google OAuth/Sheets,
+  idempotency, deduplication, rate-limit, schema-drift, timeout, telemetry,
+  alert-outbox, retention, and internal HMAC alert implementations.
+- The owner-only Apps Script source polls private edit proposals and aggregate
+  Worker alerts every five minutes, reserves mail quota, retries safely, and
+  independently reports a repeated Worker/D1 polling outage.
+- `npm --prefix worker test` currently passes 64 tests; the D1 migration also
+  loads successfully in SQLite. Local and exported-native workbook formula and
+  visual checks pass.
+- Still pending before the Stage 2 gate: owner-guided creation of free
+  Cloudflare staging resources, a Google project with no billing account, a
+  staging-only service account, Worker secrets, Apps Script authorization, and
+  real staging smoke/privacy/kill-switch/notification/high-usage tests.
 
 ## Approved target architecture
 
@@ -103,7 +132,9 @@ cutover, and rollback checklist.
 - `precise=N` means the displayed date is approximate; preserve this legacy
   semantic unless the data migration deliberately replaces it everywhere.
 - `hide=Y` is owner-controlled. Never accept `hide`, publication status,
-  timestamps, or canonical IDs from the browser.
+  timestamps, or a new canonical ID from the browser. An edit proposal must
+  submit the immutable `event_id` of an existing milestone as its private
+  target reference; the Worker still generates every new event/proposal ID.
 - During the legacy migration, do not import rows from the old add-milestone
   response sheet when that row has `hide=Y`. This rule is specific to that
   legacy source and does not by itself decide how hidden master rows migrate.
@@ -113,6 +144,18 @@ cutover, and rollback checklist.
 - The Worker fails closed when verification or storage is unavailable.
 - Logs omit form payloads, contact details, Turnstile tokens, and raw IPs.
 - Write user content to Sheets as literal strings to prevent formula injection.
+- `Timeline Source` is exactly A:N: `event_id`, `date`, `precise`, `event`,
+  `people`, `type`, `size`, `hide`, `source`, `submitted_at`, `submission_id`,
+  `contributor_name`, `contributor_email`, `publish_rank`. The Worker appends
+  A:M only; N is formula-owned.
+- `Edit Proposals` is exactly A:Q: `proposal_id`, `submission_id`, `source`,
+  `submitted_at`, `original_event_id`, `original_date`,
+  `original_description`, `original_people`, `fields`, `requested_change`,
+  `contributor_name`, `contributor_email`, `notification_status`,
+  `notified_at`, `review_status`, `reviewed_at`, `reviewer_notes`. The Worker
+  appends A:M only; the owner notification/review process owns N:Q.
+- Individual people names cannot contain commas because Sheets stores the
+  validated list as a reversible comma-separated value.
 - Forms should not exist in the DOM until their modal is opened.
 - Old Forms stay closed after cutover; rollback must never reopen them.
 
@@ -195,6 +238,9 @@ verification.
   an immediate optimistic insertion in the target experience.
 - Google lets an individual tab be published, but verify in a signed-out browser
   that only `Published Timeline (Generated)` is accessible.
+- Cloudflare's dummy Turnstile success response uses `example.com` and omits the
+  action. Use a real free staging widget restricted to the staging/local
+  hostnames for end-to-end tests of the Worker's strict hostname/action checks.
 - Protecting a Google tab cannot remove edit power from the spreadsheet owner.
   Protect the generated tab from every other editor and clearly mark it as
   generated.

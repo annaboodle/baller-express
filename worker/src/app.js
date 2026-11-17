@@ -1,4 +1,5 @@
 import { BODY_LIMIT_BYTES, PUBLIC_EVENT_FIELDS, ROUTES } from "./contracts.js";
+import { upstreamFailureCategory } from "./adapters/upstream-error.js";
 import { validateEditProposal, validateMilestone } from "./validation.js";
 
 const validators = Object.freeze({
@@ -25,6 +26,33 @@ const unavailableAdapter = Object.freeze({
     throw new DependencyUnavailableError();
   },
 });
+
+const noOpTelemetry = Object.freeze({
+  async recordAttempt() {},
+  async recordAccepted() {},
+  async recordFailure() {},
+});
+
+function scheduleTelemetry(executionContext, operation) {
+  const task = Promise.resolve().then(operation).catch(() => undefined);
+  if (typeof executionContext?.waitUntil === "function") {
+    executionContext.waitUntil(task);
+  }
+  return task;
+}
+
+function recordUpstreamFailure({
+  telemetry,
+  executionContext,
+  env,
+  error,
+}) {
+  const category = upstreamFailureCategory(error);
+  if (!category) return;
+  scheduleTelemetry(executionContext, () =>
+    telemetry.recordFailure({ env, category }),
+  );
+}
 
 function responseHeaders(origin) {
   const headers = new Headers({
@@ -123,9 +151,10 @@ export function createSubmissionApp({
   rateLimiter = unavailableAdapter,
   turnstile = unavailableAdapter,
   repository = unavailableAdapter,
+  telemetry = noOpTelemetry,
 } = {}) {
   return {
-    async fetch(request, env = {}) {
+    async fetch(request, env = {}, executionContext) {
       const url = new URL(request.url);
       const route = ROUTES[url.pathname];
       if (!route) {
@@ -175,6 +204,10 @@ export function createSubmissionApp({
         );
       }
 
+      scheduleTelemetry(executionContext, () =>
+        telemetry.recordAttempt({ env }),
+      );
+
       try {
         const rateLimit = await rateLimiter.check({
           env,
@@ -199,7 +232,13 @@ export function createSubmissionApp({
             { "retry-after": String(retryAfterSeconds) },
           );
         }
-      } catch {
+      } catch (error) {
+        recordUpstreamFailure({
+          telemetry,
+          executionContext,
+          env,
+          error,
+        });
         return errorResponse(
           503,
           "service_unavailable",
@@ -269,7 +308,13 @@ export function createSubmissionApp({
           env,
           submission: storageSubmission,
         });
-      } catch {
+      } catch (error) {
+        recordUpstreamFailure({
+          telemetry,
+          executionContext,
+          env,
+          error,
+        });
         return errorResponse(
           503,
           "service_unavailable",
@@ -310,52 +355,22 @@ export function createSubmissionApp({
         );
       }
 
+      let verification;
       try {
-        const verification = await turnstile.verify({
+        verification = await turnstile.verify({
           env,
           token: turnstileToken,
           expectedAction: route.action,
           expectedHostname: new URL(allowedOrigin).hostname,
           sourceIp,
         });
-        if (!verification?.success) {
-          return errorResponse(
-            403,
-            "verification_failed",
-            "Human verification failed. Please try again.",
-            allowedOrigin,
-          );
-        }
-
-        const result = await repository[route.repositoryMethod]({
-          endpoint: url.pathname,
+      } catch (error) {
+        recordUpstreamFailure({
+          telemetry,
+          executionContext,
           env,
-          ownerFields: route.ownerFields,
-          submission: storageSubmission,
+          error,
         });
-
-        if (result?.kind === "duplicate") {
-          return errorResponse(
-            409,
-            "duplicate_submission",
-            "This submission was already received.",
-            allowedOrigin,
-          );
-        }
-        if (result?.kind === "conflict") {
-          return errorResponse(
-            409,
-            "request_id_conflict",
-            "This request ID was already used for different content.",
-            allowedOrigin,
-          );
-        }
-        if (!isValidSuccessResult(result, route)) {
-          throw new DependencyUnavailableError();
-        }
-        const status = result.kind === "replay" ? 200 : 201;
-        return jsonResponse(status, publicResult(result, route), allowedOrigin);
-      } catch {
         return errorResponse(
           503,
           "service_unavailable",
@@ -363,6 +378,69 @@ export function createSubmissionApp({
           allowedOrigin,
         );
       }
+      if (!verification?.success) {
+        return errorResponse(
+          403,
+          "verification_failed",
+          "Human verification failed. Please try again.",
+          allowedOrigin,
+        );
+      }
+
+      let result;
+      try {
+        result = await repository[route.repositoryMethod]({
+          endpoint: url.pathname,
+          env,
+          ownerFields: route.ownerFields,
+          submission: storageSubmission,
+        });
+      } catch (error) {
+        recordUpstreamFailure({
+          telemetry,
+          executionContext,
+          env,
+          error,
+        });
+        return errorResponse(
+          503,
+          "service_unavailable",
+          "Submissions are temporarily unavailable.",
+          allowedOrigin,
+        );
+      }
+
+      if (result?.kind === "duplicate") {
+        return errorResponse(
+          409,
+          "duplicate_submission",
+          "This submission was already received.",
+          allowedOrigin,
+        );
+      }
+      if (result?.kind === "conflict") {
+        return errorResponse(
+          409,
+          "request_id_conflict",
+          "This request ID was already used for different content.",
+          allowedOrigin,
+        );
+      }
+      if (!isValidSuccessResult(result, route)) {
+        return errorResponse(
+          503,
+          "service_unavailable",
+          "Submissions are temporarily unavailable.",
+          allowedOrigin,
+        );
+      }
+      if (result.kind === "created") {
+        scheduleTelemetry(executionContext, () =>
+          telemetry.recordAccepted({ env }),
+        );
+      }
+      const status = result.kind === "replay" ? 200 : 201;
+      return jsonResponse(status, publicResult(result, route), allowedOrigin);
     },
   };
 }

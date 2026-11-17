@@ -1,9 +1,9 @@
-import { createSubmissionApp } from "./app.js";
+import { createRuntimeApp } from "./runtime.js";
 
-const app = createSubmissionApp();
+const app = createRuntimeApp();
 
 export default {
-  fetch(request, env) {
-    return app.fetch(request, env);
+  fetch(request, env, executionContext) {
+    return app.fetch(request, env, executionContext);
   },
 };

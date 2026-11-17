@@ -1,0 +1,23 @@
+{
+  "name": "baller-express-submissions-staging",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-11",
+  "workers_dev": true,
+  "vars": {
+    "ALLOWED_ORIGIN": "http://localhost:3000",
+    "SUBMISSIONS_ENABLED": "false",
+    "RATE_LIMIT_WINDOW_SECONDS": "600",
+    "RATE_LIMIT_MAX_ATTEMPTS": "20",
+    "RATE_LIMIT_RETENTION_SECONDS": "86400",
+    "DEDUPE_WINDOW_SECONDS": "600",
+    "PENDING_STALE_SECONDS": "120"
+  },
+  "d1_databases": [
+    {
+      "binding": "SUBMISSIONS_DB",
+      "database_name": "baller-express-submissions-staging",
+      "database_id": "REPLACE_WITH_STAGING_D1_ID",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
