@@ -115,6 +115,11 @@ production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
   independently reports a repeated Worker/D1 polling outage. Its explicit
   manifest limits Sheet access to the bound staging workbook and pins only the
   current-workbook, outbound-HTTPS, send-mail, and trigger-management scopes.
+  On 2026-11-17 the owner installed both tracked files, granted exactly those
+  four permissions, passed configuration validation, and installed exactly one
+  time-driven `pollBallerExpressStage2` trigger. A manual first poll sent the
+  fictional staging proposal email and changed its private notification state
+  from `PENDING` to `SENT` with `notified_at` recorded.
 - Three independent keyed staging secrets were generated into the ignored,
   owner-only local secret store. Wrangler declares exactly seven required
   server secrets. A tested filter creates an owner-only upload file containing
@@ -128,12 +133,12 @@ production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
   and `401` from the unsigned private alert route. All six D1 application
   tables remained empty, and the staging workbook retained exactly its four
   milestone fixtures and one edit fixture.
-- `npm --prefix worker test` currently passes 76 tests; the D1 migration also
+- `npm --prefix worker test` currently passes 77 tests; the D1 migration also
   loads successfully in SQLite. Local and exported-native workbook formula and
   visual checks pass.
-- Still pending before the Stage 2 gate: install and authorize Apps Script,
-  then run enabled staging privacy, storage, deduplication, notification,
-  high-usage-alert, and final kill-switch tests.
+- Still pending before the Stage 2 gate: run enabled staging privacy, storage,
+  deduplication, notification, high-usage-alert, outage/recovery, and final
+  kill-switch tests.
 
 ## Approved target architecture
 

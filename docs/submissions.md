@@ -229,6 +229,13 @@ Completed locally or in the private staging workbook:
   confirmed that all six application/telemetry tables remained empty, and a
   bounded Sheet read confirmed the workbook retained exactly its four
   milestone fixtures and one edit fixture.
+- Installed the owner-bound Apps Script code and least-privilege manifest,
+  granted exactly the current-workbook, outbound-HTTPS, send-mail, and
+  trigger-management permissions, passed configuration validation, and
+  installed exactly one five-minute `pollBallerExpressStage2` trigger. A manual
+  first poll sent the fictional edit-proposal email and atomically changed its
+  private notification state from `PENDING` to `SENT` with `notified_at`
+  recorded. The script was not deployed as a web app or API executable.
 - Implemented fail-closed Turnstile, D1 rate limiting/idempotency/deduplication,
   exact Sheets schemas, RAW writes, partial-commit reconciliation, timeouts,
   safe public responses, and the emergency switch.
@@ -238,13 +245,15 @@ Completed locally or in the private staging workbook:
   IDs, and a new milestone's seven already-public fields for safe replay; no
   contributor contact, private edit-proposal text, raw IP, token, or raw error
   string enters D1 or an aggregate alert response.
-- Verified 76 Worker tests, the SQL migration, workbook formulas, private/public
+- Verified 77 Worker tests, the SQL migration, workbook formulas, private/public
   projection, and exported-native workbook renders.
 
-Pending owner-guided staging setup and real-provider tests:
+Remaining real-provider tests:
 
-- Install/authorize the Apps Script, run storage/privacy/security/notification
-  tests, trigger a real high-usage alert, and exercise the kill switch.
+- Run enabled storage/privacy/security/deduplication tests, verify a newly
+  written edit proposal also notifies correctly, trigger a real high-usage
+  alert, exercise the owner-side outage/recovery path, and finish with the kill
+  switch re-enabled.
 
 Do not assume a Sheets API write invokes a Google Form or `onEdit` trigger. The
 time-driven Apps Script poller is the explicit notification mechanism.
@@ -304,6 +313,9 @@ or broader sharing than listed here.
    configuration, grant all four explicitly pinned permissions, and install its
    single five-minute trigger. The Sheet permission is limited to the current
    bound workbook; do not deploy the script as a web app or API executable.
+   Completed 2026-11-17: configuration validation passed, exactly one trigger
+   was installed, and a manual first poll sent and acknowledged the fictional
+   proposal notification.
 11. With the switch still off, prove public submission routes return the safe
     unavailable response, do not write Sheets, and do not record usage.
     Completed 2026-11-17: both routes returned the expected safe `503`, allowed
