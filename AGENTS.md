@@ -85,6 +85,10 @@ production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
   remote migration `0001_stage2.sql` has been applied and verified. It contains
   the six expected application tables plus Wrangler's migration ledger;
   Cloudflare also exposes its own internal `_cf_KV` table.
+- The free Turnstile widget **Baller Express Submissions - Staging** was created
+  on 2026-11-16 in Managed mode, world region, with no pre-clearance and only
+  `localhost` allowed. Its keys are kept only in the ignored local `.dev.vars`,
+  which has owner-only file permissions.
 - The entire generated tab, `Timeline Source!N:N`, and
   `Edit Proposals!N:Q` are protected so future non-owner editors cannot alter
   generated formulas, notification timestamps, or review decisions.
@@ -100,10 +104,10 @@ production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
 - `npm --prefix worker test` currently passes 64 tests; the D1 migration also
   loads successfully in SQLite. Local and exported-native workbook formula and
   visual checks pass.
-- Still pending before the Stage 2 gate: owner-guided creation of free
-  Cloudflare staging resources, a Google project with no billing account, a
-  staging-only service account, Worker secrets, Apps Script authorization, and
-  real staging smoke/privacy/kill-switch/notification/high-usage tests.
+- Still pending before the Stage 2 gate: the remaining staging Worker setup, a
+  Google project with no billing account, a staging-only service account, the
+  remaining Worker secrets, Apps Script authorization, and real staging
+  smoke/privacy/kill-switch/notification/high-usage tests.
 
 ## Approved target architecture
 
@@ -250,6 +254,11 @@ verification.
   Node.js 22.12.0 or newer, so the 2026-11-16 staging D1 provisioning used
   Wrangler 4.158.0. Upgrade Node before adopting a newer Wrangler instead of
   ignoring its engine requirement.
+- On 2026-11-16 the Turnstile dashboard's **Create** action stalled twice and
+  created no widget. `wrangler turnstile widget list` verified the absence of a
+  partial or duplicate resource, then authenticated Wrangler 4.158.0 created
+  the widget successfully. Check the resource list before retrying a stalled
+  dashboard mutation.
 - Protecting a Google tab cannot remove edit power from the spreadsheet owner.
   Protect the generated tab from every other editor and clearly mark it as
   generated.

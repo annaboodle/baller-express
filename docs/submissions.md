@@ -199,6 +199,9 @@ Completed locally or in the private staging workbook:
 - Created the free staging D1 database `baller-submissions-staging`, applied
   `0001_stage2.sql`, and verified the six application tables plus Wrangler's
   migration ledger. Cloudflare also exposes its internal `_cf_KV` table.
+- Created the free Turnstile widget **Baller Express Submissions - Staging** in
+  Managed mode, world region, with pre-clearance disabled and only `localhost`
+  allowed. Its keys remain in the ignored, owner-readable local secrets file.
 - Implemented fail-closed Turnstile, D1 rate limiting/idempotency/deduplication,
   exact Sheets schemas, RAW writes, partial-commit reconciliation, timeouts,
   safe public responses, and the emergency switch.
@@ -213,7 +216,7 @@ Completed locally or in the private staging workbook:
 
 Pending owner-guided staging setup and real-provider tests:
 
-- Create free Cloudflare staging resources and a no-billing Google project.
+- Finish the staging Worker setup and create a no-billing Google project.
 - Share only the staging workbook with a staging-only service account.
 - Deploy the Worker to `workers.dev` with no custom or production route.
 - Install/authorize the Apps Script, run storage/privacy/security/notification
@@ -241,11 +244,15 @@ or broader sharing than listed here.
    Node.js 22.6.0 runtime does not meet newer Wrangler releases' Node 22.12.0
    requirement. Verify the six application tables and `d1_migrations`;
    Cloudflare's internal `_cf_KV` table may also be visible.
-4. Create one free staging-only Turnstile widget with only the required
-   staging/local hostnames. Use that real staging widget for end-to-end tests:
-   Cloudflare's dummy success response always uses `example.com` and omits the
-   action, so dummy keys cannot pass the Worker's strict hostname/action checks.
-   See Cloudflare's official
+4. Create one free staging-only Turnstile widget named **Baller Express
+   Submissions - Staging**, in Managed mode and world region, with
+   pre-clearance disabled and only `localhost` allowed. On 2026-11-16 the
+   dashboard stalled twice without creating a resource; the authenticated
+   Wrangler 4.158.0 CLI verified that no duplicate existed and created it
+   successfully. Keep its secret only in ignored local secret storage. Use
+   this real staging widget for end-to-end tests: Cloudflare's dummy success
+   response always uses `example.com` and omits the action, so dummy keys cannot
+   pass the Worker's strict hostname/action checks. See Cloudflare's official
    [testing behavior](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
 5. In Google Cloud, create a dedicated staging project with **no billing account
    attached**, enable only the Google Sheets API, and create one staging-only
