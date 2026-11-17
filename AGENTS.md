@@ -120,18 +120,18 @@ production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
 - The Worker was deployed to Cloudflare staging on 2026-11-17 with
   `SUBMISSIONS_ENABLED=false`, localhost-only CORS, the staging D1 binding, no
   custom domain, and no production route. The temporary secret-upload file was
-  deleted immediately. All six D1 application tables remained empty, and the
-  staging workbook retained exactly its four milestone fixtures and one edit
-  fixture.
-- The account still needs its free `workers.dev` subdomain registered before
-  the deployed Worker URL can complete TLS and live kill-switch smoke tests.
+  deleted immediately. The free account-level `workers.dev` subdomain was then
+  registered. Live smoke tests returned `204` for allowed CORS preflight, the
+  safe `503 service_unavailable` response from both disabled submission routes,
+  and `401` from the unsigned private alert route. All six D1 application
+  tables remained empty, and the staging workbook retained exactly its four
+  milestone fixtures and one edit fixture.
 - `npm --prefix worker test` currently passes 76 tests; the D1 migration also
   loads successfully in SQLite. Local and exported-native workbook formula and
   visual checks pass.
-- Still pending before the Stage 2 gate: register the free account-level
-  `workers.dev` subdomain, complete disabled-route smoke tests, install and
-  authorize Apps Script, and run real staging
-  privacy/kill-switch/notification/high-usage tests.
+- Still pending before the Stage 2 gate: install and authorize Apps Script,
+  then run enabled staging privacy, storage, deduplication, notification,
+  high-usage-alert, and final kill-switch tests.
 
 ## Approved target architecture
 

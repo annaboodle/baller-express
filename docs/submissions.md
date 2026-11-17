@@ -222,7 +222,10 @@ Completed locally or in the private staging workbook:
   Turnstile site key.
 - Deployed the staging Worker with `SUBMISSIONS_ENABLED=false`, localhost-only
   CORS, no custom domain, and no production route. The temporary filtered
-  secret file was deleted immediately after deployment. A read-only D1 audit
+  secret file was deleted immediately after deployment. Registered the free
+  account-level `workers.dev` subdomain, then verified live `204` preflight,
+  safe `503 service_unavailable` responses from both disabled submission
+  routes, and `401` from the unsigned private alert route. A read-only D1 audit
   confirmed that all six application/telemetry tables remained empty, and a
   bounded Sheet read confirmed the workbook retained exactly its four
   milestone fixtures and one edit fixture.
@@ -240,9 +243,6 @@ Completed locally or in the private staging workbook:
 
 Pending owner-guided staging setup and real-provider tests:
 
-- Register the free account-level `workers.dev` subdomain so the already
-  deployed staging route can complete TLS, then run the disabled-route smoke
-  tests.
 - Install/authorize the Apps Script, run storage/privacy/security/notification
   tests, trigger a real high-usage alert, and exercise the kill switch.
 
@@ -297,12 +297,16 @@ or broader sharing than listed here.
    account-level `workers.dev` subdomain under **Compute > Workers & Pages >
    Your subdomain**. This does not connect the production custom domain. Wait
    for TLS/DNS to become available before interpreting smoke-test failures.
+   Completed 2026-11-17.
 10. In the staging workbook's owner-bound Apps Script project, install
    `worker/apps-script/Code.gs`. Set the four Script Properties documented in
    `worker/apps-script/README.md`, validate configuration, authorize the minimum
    Sheet/HTTPS/mail scopes, and install its single five-minute trigger.
 11. With the switch still off, prove public submission routes return the safe
     unavailable response, do not write Sheets, and do not record usage.
+    Completed 2026-11-17: both routes returned the expected safe `503`, allowed
+    preflight returned `204`, unsigned private alerts returned `401`, all D1
+    application tables stayed empty, and fixture row counts were unchanged.
 12. Enable the switch briefly and run fictional milestone/edit-proposal smoke
     tests. Verify exact A:M writes, the retained `publish_rank` formula, one
     generated public row, private contact isolation, and owner email delivery.
