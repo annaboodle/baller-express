@@ -80,6 +80,11 @@ production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
 - The private native Google Sheet **Baller Express — Stage 2 Staging** has the
   approved three tabs, fictional fixture data only, and timezone `Etc/UTC`.
   It remains owner-only until a staging-only service account is created.
+- The free Cloudflare D1 database `baller-submissions-staging` was created on
+  2026-11-16. Its ID is kept only in the ignored local Wrangler configuration;
+  remote migration `0001_stage2.sql` has been applied and verified. It contains
+  the six expected application tables plus Wrangler's migration ledger;
+  Cloudflare also exposes its own internal `_cf_KV` table.
 - The entire generated tab, `Timeline Source!N:N`, and
   `Edit Proposals!N:Q` are protected so future non-owner editors cannot alter
   generated formulas, notification timestamps, or review decisions.
@@ -241,6 +246,10 @@ verification.
 - Cloudflare's dummy Turnstile success response uses `example.com` and omits the
   action. Use a real free staging widget restricted to the staging/local
   hostnames for end-to-end tests of the Worker's strict hostname/action checks.
+- The laptop currently runs Node.js 22.6.0. Wrangler 4.159.0 and newer require
+  Node.js 22.12.0 or newer, so the 2026-11-16 staging D1 provisioning used
+  Wrangler 4.158.0. Upgrade Node before adopting a newer Wrangler instead of
+  ignoring its engine requirement.
 - Protecting a Google tab cannot remove edit power from the spreadsheet owner.
   Protect the generated tab from every other editor and clearly mark it as
   generated.

@@ -196,6 +196,9 @@ Completed locally or in the private staging workbook:
 
 - Created and hardened the three-tab native staging workbook with fictional
   fixtures only.
+- Created the free staging D1 database `baller-submissions-staging`, applied
+  `0001_stage2.sql`, and verified the six application tables plus Wrangler's
+  migration ledger. Cloudflare also exposes its internal `_cf_KV` table.
 - Implemented fail-closed Turnstile, D1 rate limiting/idempotency/deduplication,
   exact Sheets schemas, RAW writes, partial-commit reconciliation, timeouts,
   safe public responses, and the emergency switch.
@@ -229,11 +232,15 @@ paid plan, pay-as-you-go enrollment, a billing account, a production resource,
 or broader sharing than listed here.
 
 1. In Cloudflare, confirm the account is on **Workers Free**. Do not upgrade.
-2. Create one staging D1 database named
-   `baller-express-submissions-staging`. Copy
+2. Create one staging D1 database named `baller-submissions-staging`. Copy
    `worker/wrangler.staging.example.jsonc` to the ignored
    `worker/wrangler.staging.jsonc`, then replace only its staging D1 placeholder.
-3. Apply `worker/migrations/0001_stage2.sql` to that remote staging database.
+3. From `worker/`, apply `migrations/0001_stage2.sql` to that remote staging
+   database with the database name, `--remote`, and the explicit ignored
+   staging config. On 2026-11-16 this used Wrangler 4.158.0 because the local
+   Node.js 22.6.0 runtime does not meet newer Wrangler releases' Node 22.12.0
+   requirement. Verify the six application tables and `d1_migrations`;
+   Cloudflare's internal `_cf_KV` table may also be visible.
 4. Create one free staging-only Turnstile widget with only the required
    staging/local hostnames. Use that real staging widget for end-to-end tests:
    Cloudflare's dummy success response always uses `example.com` and omits the
