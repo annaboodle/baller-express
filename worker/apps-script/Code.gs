@@ -1,4 +1,6 @@
 /**
+ * @OnlyCurrentDoc
+ *
  * Baller Express Stage 2 staging notifications.
  *
  * Bind this script only to the private staging workbook. Set these Script
@@ -45,7 +47,9 @@ var BALLER_OUTAGE_COOLDOWN_MS_ = 6 * 60 * 60 * 1000;
 var BALLER_ALERT_MEMORY_MS_ = 7 * 24 * 60 * 60 * 1000;
 
 function setupBallerExpressStage2Trigger() {
+  ScriptApp.requireAllScopes(ScriptApp.AuthMode.FULL);
   ballerConfiguration_();
+  ballerEditSheet_();
   ScriptApp.getProjectTriggers().forEach(function (trigger) {
     if (trigger.getHandlerFunction() === "pollBallerExpressStage2") {
       ScriptApp.deleteTrigger(trigger);
@@ -58,6 +62,7 @@ function setupBallerExpressStage2Trigger() {
 }
 
 function validateBallerExpressStage2Configuration() {
+  ScriptApp.requireAllScopes(ScriptApp.AuthMode.FULL);
   ballerConfiguration_();
   ballerEditSheet_();
   return "Stage 2 staging notification configuration is valid.";
@@ -110,9 +115,13 @@ function ballerEditSheet_() {
   var spreadsheetId = PropertiesService.getScriptProperties().getProperty(
     "STAGING_SPREADSHEET_ID",
   );
-  var sheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName(
-    BALLER_EDIT_SHEET_,
-  );
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  if (!spreadsheet || spreadsheet.getId() !== spreadsheetId) {
+    throw new Error(
+      "This script must remain bound to the configured staging workbook.",
+    );
+  }
+  var sheet = spreadsheet.getSheetByName(BALLER_EDIT_SHEET_);
   if (!sheet) throw new Error("The Edit Proposals sheet is unavailable.");
   var headers = sheet
     .getRange(1, 1, 1, BALLER_HEADERS_.length)

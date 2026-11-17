@@ -25,11 +25,19 @@ values in source control.
 - `STAGING_WORKER_URL` -- the HTTPS staging origin with no trailing slash
 - `ALERT_POLL_SECRET` -- the same 32+ character value stored as a Worker secret
 
-After setting them, manually run
-`validateBallerExpressStage2Configuration()`. Then run
-`setupBallerExpressStage2Trigger()` to create one five-minute trigger. Google
-will ask the owner to authorize access to the staging Sheet, outbound HTTPS,
-and email.
+Install both tracked project files: replace `Code.gs` with the tracked source,
+then expose and replace `appsscript.json` with the tracked manifest. The
+manifest pins exactly four permissions: the current workbook only, outbound
+HTTPS, sending mail, and managing this script's triggers. The script verifies
+that its bound workbook ID matches `STAGING_SPREADSHEET_ID`; it never opens an
+arbitrary Sheet by ID.
+
+After setting the properties and installing both files, manually run
+`validateBallerExpressStage2Configuration()`. Google will ask the owner to
+authorize all four required permissions. Grant all four so a background
+trigger cannot later fail for partial consent. Then run
+`setupBallerExpressStage2Trigger()` to create one five-minute trigger. Do not
+deploy the Apps Script as a web app or API executable.
 
 Keep Google Apps Script's own trigger-failure notifications enabled as a
 secondary monitor. The script reserves ten daily MailApp messages so proposal

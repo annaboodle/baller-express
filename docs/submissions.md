@@ -298,10 +298,12 @@ or broader sharing than listed here.
    Your subdomain**. This does not connect the production custom domain. Wait
    for TLS/DNS to become available before interpreting smoke-test failures.
    Completed 2026-11-17.
-10. In the staging workbook's owner-bound Apps Script project, install
-   `worker/apps-script/Code.gs`. Set the four Script Properties documented in
-   `worker/apps-script/README.md`, validate configuration, authorize the minimum
-   Sheet/HTTPS/mail scopes, and install its single five-minute trigger.
+10. In the staging workbook's owner-bound Apps Script project, install both
+   `worker/apps-script/Code.gs` and `worker/apps-script/appsscript.json`. Set the
+   four Script Properties documented in `worker/apps-script/README.md`, validate
+   configuration, grant all four explicitly pinned permissions, and install its
+   single five-minute trigger. The Sheet permission is limited to the current
+   bound workbook; do not deploy the script as a web app or API executable.
 11. With the switch still off, prove public submission routes return the safe
     unavailable response, do not write Sheets, and do not record usage.
     Completed 2026-11-17: both routes returned the expected safe `503`, allowed

@@ -81,8 +81,10 @@ comma-separated representation.
 
 ## Free owner notifications and alerts
 
-`apps-script/Code.gs` is installed manually in the owner-bound staging
-workbook only. Every five minutes it:
+`apps-script/Code.gs` and its least-privilege `apps-script/appsscript.json`
+manifest are installed manually in the owner-bound staging workbook only. The
+manifest restricts Sheet access to that current workbook. Every five minutes
+the script:
 
 1. emails the owner about `PENDING`/`RETRY` edit proposals and updates M:N;
 2. leases aggregate alerts from the Worker, sends them, and ACKs or retries;

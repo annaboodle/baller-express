@@ -112,7 +112,9 @@ production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
   alert-outbox, retention, and internal HMAC alert implementations.
 - The owner-only Apps Script source polls private edit proposals and aggregate
   Worker alerts every five minutes, reserves mail quota, retries safely, and
-  independently reports a repeated Worker/D1 polling outage.
+  independently reports a repeated Worker/D1 polling outage. Its explicit
+  manifest limits Sheet access to the bound staging workbook and pins only the
+  current-workbook, outbound-HTTPS, send-mail, and trigger-management scopes.
 - Three independent keyed staging secrets were generated into the ignored,
   owner-only local secret store. Wrangler declares exactly seven required
   server secrets. A tested filter creates an owner-only upload file containing
