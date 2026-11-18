@@ -110,6 +110,10 @@ production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
 - The local Worker now has staging-only D1, Turnstile, Google OAuth/Sheets,
   idempotency, deduplication, rate-limit, schema-drift, timeout, telemetry,
   alert-outbox, retention, and internal HMAC alert implementations.
+- Edit proposals now perform a live `Timeline Source` lookup after Turnstile
+  verification and before any D1 reservation or append. A nonexistent target
+  returns a safe field error; idempotent replays still resolve before this
+  lookup.
 - The owner-only Apps Script source polls private edit proposals and aggregate
   Worker alerts every five minutes, reserves mail quota, retries safely, and
   independently reports a repeated Worker/D1 polling outage. Its explicit
@@ -133,7 +137,17 @@ production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
   and `401` from the unsigned private alert route. All six D1 application
   tables remained empty, and the staging workbook retained exactly its four
   milestone fixtures and one edit fixture.
-- `npm --prefix worker test` currently passes 77 tests; the D1 migration also
+- A credential-free localhost smoke harness now exists solely for Stage 2
+  provider tests. It binds to local IPv4 port 3000, requires the literal
+  `localhost:3000` Host header, obtains only the public Turnstile site key from
+  ignored local configuration, accepts the staging `workers.dev` origin only
+  at runtime, and never displays or logs verification tokens. It is separate
+  from React and is never deployed.
+- The read-only staging workbook auditor fetches bounded ranges and reports
+  only counts and schema/formula/privacy booleans. Its first live baseline saw
+  four source rows, three generated public rows, and one proposal row; all
+  checks passed and no private columns appeared in the generated tab.
+- `npm --prefix worker test` currently passes 87 tests; the D1 migration also
   loads successfully in SQLite. Local and exported-native workbook formula and
   visual checks pass.
 - Still pending before the Stage 2 gate: run enabled staging privacy, storage,

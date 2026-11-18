@@ -86,8 +86,10 @@ function memoryStore() {
 function fakeSheets() {
   const rows = [];
   const knownSubmissionIds = new Set();
+  const knownEventIds = new Set(["event-existing-1"]);
   return {
     rows,
+    knownEventIds,
     knownSubmissionIds,
     async appendRow(entry) {
       rows.push(entry);
@@ -98,6 +100,9 @@ function fakeSheets() {
     },
     async hasSubmission({ submissionId }) {
       return knownSubmissionIds.has(submissionId);
+    },
+    async hasEvent({ eventId }) {
+      return knownEventIds.has(eventId);
     },
   };
 }
@@ -250,7 +255,7 @@ test("Google authentication fails closed when token exchange times out", async (
   );
 });
 
-test("Google Sheets writes rows as RAW values and can find a submission ID", async () => {
+test("Google Sheets writes rows as RAW values and can find submission and event IDs", async () => {
   const requests = [];
   const client = createGoogleSheetsClient({
     tokenProvider: { async getToken() { return "access-token"; } },
@@ -266,6 +271,12 @@ test("Google Sheets writes rows as RAW values and can find a submission ID", asy
       if (decodedUrl.includes(SHEET_LAYOUT.milestone.headerRange)) {
         return new Response(
           JSON.stringify({ values: [[...SHEET_LAYOUT.milestone.headers]] }),
+          { status: 200 },
+        );
+      }
+      if (decodedUrl.includes(SHEET_LAYOUT.milestone.eventIdRange)) {
+        return new Response(
+          JSON.stringify({ values: [["event_id"], ["event-existing-1"]] }),
           { status: 200 },
         );
       }
@@ -300,14 +311,20 @@ test("Google Sheets writes rows as RAW values and can find a submission ID", asy
     range: SHEET_LAYOUT.milestone.submissionIdRange,
     submissionId: "submission-1",
   });
+  const eventFound = await client.hasEvent({
+    env: stagingEnv(),
+    range: SHEET_LAYOUT.milestone.eventIdRange,
+    eventId: "event-existing-1",
+  });
 
   assert.equal(found, true);
+  assert.equal(eventFound, true);
   assert.match(requests[1].url, /valueInputOption=RAW/);
   assert.match(requests[1].url, /insertDataOption=OVERWRITE/);
   assert.equal(JSON.parse(requests[1].init.body).values[0].length, 13);
   assert.equal(JSON.parse(requests[1].init.body).values[0][3], "=literal");
   assert.equal(requests[1].init.headers.authorization, "Bearer access-token");
-  assert.equal(requests.length, 4);
+  assert.equal(requests.length, 6);
 });
 
 test("Google Sheets rejects schema drift before writing", async () => {
@@ -440,6 +457,29 @@ test("repository writes exactly Edit Proposals A:M with immutable event referenc
     "PENDING",
   ]);
   assert.equal(sheets.rows[0].values.length, 13);
+});
+
+test("repository rejects an edit proposal whose target event does not exist", async () => {
+  const store = memoryStore();
+  const sheets = fakeSheets();
+  sheets.knownEventIds.clear();
+  const repository = createD1SheetsRepository({
+    store,
+    sheets,
+    randomUuid: uuidSequence("unused-submission", "unused-proposal"),
+  });
+
+  const result = await repository.createEditProposal({
+    endpoint: "/v1/edit-proposals",
+    env: stagingEnv(),
+    ownerFields: { source: "public_edit_proposal" },
+    submission: validEditProposal(),
+  });
+
+  assert.deepEqual(result, { kind: "event_not_found" });
+  assert.equal(sheets.rows.length, 0);
+  assert.equal(store.requests.size, 0);
+  assert.equal(store.dedupe.size, 0);
 });
 
 test("repository replays one request and rejects a changed request ID payload", async () => {

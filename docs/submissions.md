@@ -239,13 +239,22 @@ Completed locally or in the private staging workbook:
 - Implemented fail-closed Turnstile, D1 rate limiting/idempotency/deduplication,
   exact Sheets schemas, RAW writes, partial-commit reconciliation, timeouts,
   safe public responses, and the emergency switch.
+- Added a verified existing-event lookup for edit proposals. A nonexistent
+  `original_event_id` is rejected before D1 reservation or Sheet append, while
+  a true idempotent replay still resolves without repeating the lookup.
 - Implemented aggregate-only D1 telemetry, alert cooldown/outbox/lease state,
   HMAC-authenticated internal alert endpoints, retention cleanup, and an
   owner-only Apps Script poller. D1 retains keyed fingerprints, server-owned
   IDs, and a new milestone's seven already-public fields for safe replay; no
   contributor contact, private edit-proposal text, raw IP, token, or raw error
   string enters D1 or an aggregate alert response.
-- Verified 77 Worker tests, the SQL migration, workbook formulas, private/public
+- Added a local-only real-Turnstile smoke harness that is separate from React
+  and accepts the staging Worker origin only at runtime; no resource value or
+  token is stored in tracked source. Added a bounded, aggregate-only workbook
+  auditor whose first live baseline verified four source rows, three generated
+  public rows, one proposal row, correct formulas/schemas, and blank private
+  columns on the generated tab.
+- Verified 87 Worker tests, the SQL migration, workbook formulas, private/public
   projection, and exported-native workbook renders.
 
 Remaining real-provider tests:
@@ -324,6 +333,9 @@ or broader sharing than listed here.
 12. Enable the switch briefly and run fictional milestone/edit-proposal smoke
     tests. Verify exact A:M writes, the retained `publish_rank` formula, one
     generated public row, private contact isolation, and owner email delivery.
+    Use `worker/scripts/serve-staging-smoke.mjs` at the literal
+    `http://localhost:3000`; it is a local test tool, not the Stage 3 frontend.
+    Run `npm run audit:staging-sheets` before and after the attended window.
 13. Test replay, request-ID conflict, contact-independent duplicate detection,
     the observed three-request bot burst, wrong-origin and malformed requests,
     schema drift, upstream timeouts, and formula-like literal text.

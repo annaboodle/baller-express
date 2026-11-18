@@ -192,6 +192,15 @@ export function createD1SheetsRepository({
     });
     if (existing) return existing;
 
+    if (kind === "editProposal") {
+      const eventExists = await sheets.hasEvent({
+        env,
+        range: SHEET_LAYOUT.milestone.eventIdRange,
+        eventId: submission.original.eventId,
+      });
+      if (!eventExists) return { kind: "event_not_found" };
+    }
+
     const nowMs = now();
     const nowSeconds = Math.floor(nowMs / 1000);
     const submittedAt = nowMs / 86_400_000 + 25_569;

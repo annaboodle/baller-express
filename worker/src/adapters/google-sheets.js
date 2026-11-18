@@ -18,6 +18,7 @@ export const SHEET_LAYOUT = Object.freeze({
   milestone: Object.freeze({
     name: "Timeline Source",
     appendRange: "Timeline Source!A:M",
+    eventIdRange: "Timeline Source!A:A",
     submissionIdRange: "Timeline Source!K:K",
     headerRange: "Timeline Source!A1:N1",
     headers: Object.freeze([
@@ -211,6 +212,24 @@ export function createGoogleSheetsClient({
       });
       return (result?.values || []).some(
         (row) => Array.isArray(row) && row[0] === submissionId,
+      );
+    },
+
+    async hasEvent({ env, range, eventId }) {
+      const layout = layoutForRange(range, "eventIdRange");
+      if (typeof eventId !== "string" || eventId.length === 0) {
+        throw new Error("An event ID is required.");
+      }
+      const token = await tokenProvider.getToken(env);
+      await assertSchema({ env, layout, token });
+      const result = await readValues({
+        env,
+        range,
+        token,
+        unavailableMessage: "The staging event lookup failed.",
+      });
+      return (result?.values || []).some(
+        (row) => Array.isArray(row) && row[0] === eventId,
       );
     },
   });

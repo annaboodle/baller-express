@@ -299,6 +299,34 @@ test("accepts a valid edit proposal and uses its distinct action", async () => {
   assert.deepEqual(ownerFields, { source: "public_edit_proposal" });
 });
 
+test("returns a field error when an edit proposal targets a missing event", async () => {
+  const app = createSubmissionApp(
+    services({
+      repository: {
+        async createEditProposal() {
+          return { kind: "event_not_found" };
+        },
+      },
+    }),
+  );
+
+  const response = await app.fetch(
+    jsonRequest("/v1/edit-proposals", validEditProposal()),
+    enabledEnv,
+  );
+  const body = await responseJson(response);
+
+  assert.equal(response.status, 400);
+  assert.equal(body.error.code, "event_not_found");
+  assert.deepEqual(body.error.fields, [
+    {
+      field: "original.eventId",
+      code: "event_not_found",
+      message: "Choose an existing milestone.",
+    },
+  ]);
+});
+
 test("returns an idempotent replay before reusing a single-use token", async () => {
   let verifyCalls = 0;
   let createCalls = 0;

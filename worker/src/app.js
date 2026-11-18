@@ -418,6 +418,21 @@ export function createSubmissionApp({
           allowedOrigin,
         );
       }
+      if (result?.kind === "event_not_found") {
+        return errorResponse(
+          400,
+          "event_not_found",
+          "The milestone to edit could not be found.",
+          allowedOrigin,
+          [
+            {
+              field: "original.eventId",
+              code: "event_not_found",
+              message: "Choose an existing milestone.",
+            },
+          ],
+        );
+      }
       if (result?.kind === "conflict") {
         return errorResponse(
           409,

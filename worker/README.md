@@ -35,7 +35,8 @@ npm test
 - `repository.createMilestone(context)` and
   `repository.createEditProposal(context)` run only after verification and
   return `{ kind: "created", ... }`, `{ kind: "replay", ... }`,
-  `{ kind: "duplicate" }`, or `{ kind: "conflict" }`.
+  `{ kind: "duplicate" }`, or `{ kind: "conflict" }`. Edit proposals may also
+  return `{ kind: "event_not_found" }` before reserving or writing anything.
 
 Stage 2 implements those interfaces with isolated staging resources:
 
@@ -47,6 +48,10 @@ Stage 2 implements those interfaces with isolated staging resources:
   `valueInputOption=RAW`, and records only public replay data in D1. The
   content fingerprint excludes request IDs, single-use Turnstile tokens, and
   optional contributor contact details.
+- Before writing an edit proposal, the repository checks the immutable target
+  ID against `Timeline Source`; a missing target is a safe field error and
+  creates no D1 reservation or Sheet row. Idempotent replays still resolve
+  before this lookup.
 - A pending D1 record can reconcile a successful Sheets append by looking up
   its server-generated submission ID before any retry writes another row.
 - Turnstile, Google OAuth, and Sheets requests use bounded timeouts and fail
@@ -175,6 +180,32 @@ The ignored filename is `wrangler.staging.jsonc`. The example intentionally
 cannot deploy until its D1 placeholder is replaced. Confirm the Cloudflare
 account is still Workers Free and the Google project has no billing account
 before any provisioning or deployment command.
+
+Run `npm run audit:staging-sheets` before and after attended provider tests.
+The read-only audit uses the ignored staging Google credentials, reads at most
+1,000 rows from each of the three expected tabs, and prints only counts and
+boolean schema/formula/privacy checks. It never prints row content, IDs,
+contact details, tokens, credentials, or the workbook URL.
+
+For Stage 2 live-provider tests only, `scripts/serve-staging-smoke.mjs` serves a
+separate credential-free harness at exactly `http://localhost:3000`. It is not
+part of the React app and is never deployed. It reads only the public
+`TURNSTILE_SITE_KEY` from the ignored, owner-only `.dev.vars`, accepts a
+path-free staging `workers.dev` origin at runtime, and never logs or displays a
+Turnstile token:
+
+```sh
+node scripts/serve-staging-smoke.mjs \
+  --worker-origin https://STAGING-NAME.ACCOUNT.workers.dev
+```
+
+Use only the actual staging Worker origin. The server binds to local IPv4 port
+3000 and rejects any Host header other than `localhost:3000`; open it using
+`http://localhost:3000`, not `127.0.0.1` or a file URL. Each verified submit
+uses the route's exact Turnstile action and resets the widget for a fresh,
+single-use token. The replay/conflict buttons intentionally use a nonempty
+placeholder because those checks occur before Turnstile. Stop the harness after
+the attended test window.
 
 There is deliberately no custom domain, production route, production Sheet ID,
 or deployment command in this repository yet.
