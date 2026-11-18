@@ -157,6 +157,15 @@ test("summarizes counts, schemas, formula health, and privacy without row data",
     editProposals: {
       rows: 1,
       schemaMatches: true,
+      notificationStatuses: {
+        PENDING: 1,
+        RETRY: 0,
+        SENT: 0,
+        FAILED: 0,
+        SKIPPED: 0,
+        blank: 0,
+        other: 0,
+      },
       formulaCellsInWorkerOwnedColumns: 0,
     },
   });
@@ -171,6 +180,38 @@ test("summarizes counts, schemas, formula health, and privacy without row data",
   ]) {
     assert.doesNotMatch(serialized, new RegExp(forbidden, "i"));
   }
+});
+
+test("buckets blank and unknown notification states without exposing values", () => {
+  const proposals = [proposalHeaders];
+  for (const [id, status] of [
+    ["proposal-sent", "SENT"],
+    ["proposal-skipped", "SKIPPED"],
+    ["proposal-blank", ""],
+    ["proposal-unknown", "private-unexpected-status"],
+    ["", "FAILED"],
+  ]) {
+    const row = new Array(13).fill("");
+    row[0] = id;
+    row[12] = status;
+    proposals.push(row);
+  }
+  const summary = summarizeStagingWorkbook({
+    unformatted: batch([sourceHeaders], [publicHeaders], proposals),
+    formulas: batch([sourceHeaders], [publicHeaders], proposals),
+  });
+
+  assert.equal(summary.editProposals.rows, 4);
+  assert.deepEqual(summary.editProposals.notificationStatuses, {
+    PENDING: 0,
+    RETRY: 0,
+    SENT: 1,
+    FAILED: 0,
+    SKIPPED: 1,
+    blank: 1,
+    other: 1,
+  });
+  assert.doesNotMatch(JSON.stringify(summary), /private-unexpected-status/);
 });
 
 test("uses two bounded batch reads and returns only the aggregate summary", async () => {

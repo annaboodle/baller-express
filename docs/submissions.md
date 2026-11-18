@@ -1,8 +1,8 @@
 # Submission security and deployment runbook
 
-Status: Stage 1 complete; Stage 2 isolated staging implementation in progress
+Status: Stages 1 and 2 complete; Stage 3 not authorized
 
-Last reviewed: 2026-11-17
+Last reviewed: 2026-11-18
 
 ## Production safety rule
 
@@ -191,7 +191,9 @@ shutdown of the old Forms requires the applicable later-stage approval.
 
 ### Stage 2: isolated staging backend and workbook
 
-In progress as of 2026-11-17.
+**Completed 2026-11-18.** The staging submission switch is disabled and all
+production resources remain unchanged. This completion does not authorize
+Stage 3.
 
 Completed locally or in the private staging workbook:
 
@@ -228,7 +230,8 @@ Completed locally or in the private staging workbook:
   routes, and `401` from the unsigned private alert route. A read-only D1 audit
   confirmed that all six application/telemetry tables remained empty, and a
   bounded Sheet read confirmed the workbook retained exactly its four
-  milestone fixtures and one edit fixture.
+  milestone fixtures and one edit fixture. This was the initial disabled
+  baseline before the attended enabled-window tests described below.
 - Installed the owner-bound Apps Script code and least-privilege manifest,
   granted exactly the current-workbook, outbound-HTTPS, send-mail, and
   trigger-management permissions, passed configuration validation, and
@@ -254,21 +257,40 @@ Completed locally or in the private staging workbook:
   auditor whose first live baseline verified four source rows, three generated
   public rows, one proposal row, correct formulas/schemas, and blank private
   columns on the generated tab.
-- Verified 87 Worker tests, the SQL migration, workbook formulas, private/public
+- Completed an attended real-Turnstile window that created one fictional
+  milestone and one fictional edit proposal. Verified a successful replay with
+  no second row, a changed-payload request-ID conflict, contact-independent
+  duplicate rejection, and the observed three-request bot pattern collapsing
+  to one creation plus two duplicate responses. A nonexistent edit target was
+  rejected before D1 reservation or Sheet append.
+- Live requests verified wrong-origin, malformed-JSON, unsupported-media, and
+  formula-injection defenses; automated adapter tests cover schema drift and
+  upstream timeouts. The final read-only workbook audit reported five source
+  rows, four generated public rows, and two private edit proposals; both
+  proposal notifications were `SENT`, the generated tab still exposed only
+  seven public fields, and all formula ownership checks passed.
+- Reached exactly 100 aggregate attempts and two accepted submissions. The
+  100-attempt/10-minute alert was delivered once and ACKed. D1 inspection
+  showed only enumerated aggregate metrics, keyed fingerprints, server-owned
+  identifiers, and public milestone replay fields—not contributor contact,
+  private proposal text, raw IPs, tokens, or raw error strings.
+- Deliberately made the owner monitor's staging alert endpoint unreachable for
+  three consecutive polls, received the independent outage email, restored the
+  valid endpoint, and received the recovery email. The automatic five-minute
+  trigger remains installed exactly once.
+- Restored `SUBMISSIONS_ENABLED=false`, redeployed staging, and reverified safe
+  `503` responses from both submission routes, `204` preflight, unchanged
+  telemetry/workbook counts, and the final five/four/two row counts. Stopped
+  the local smoke harness.
+- Verified 88 Worker tests, the SQL migration, workbook formulas, private/public
   projection, and exported-native workbook renders.
-
-Remaining real-provider tests:
-
-- Run enabled storage/privacy/security/deduplication tests, verify a newly
-  written edit proposal also notifies correctly, trigger a real high-usage
-  alert, exercise the owner-side outage/recovery path, and finish with the kill
-  switch re-enabled.
 
 Do not assume a Sheets API write invokes a Google Form or `onEdit` trigger. The
 time-driven Apps Script poller is the explicit notification mechanism.
 
-- Gate: privacy, storage, security, notification, and high-usage-alert tests
-  pass without publishing PII or touching production data.
+- Gate passed: privacy, storage, security, notification, high-usage-alert,
+  outage/recovery, and kill-switch tests completed without publishing private
+  data or touching production resources.
 
 #### Stage 2 owner walkthrough
 
@@ -336,20 +358,68 @@ or broader sharing than listed here.
     Use `worker/scripts/serve-staging-smoke.mjs` at the literal
     `http://localhost:3000`; it is a local test tool, not the Stage 3 frontend.
     Run `npm run audit:staging-sheets` before and after the attended window.
+    Completed 2026-11-17: one milestone and one edit proposal were accepted;
+    the final aggregate workbook counts were five source rows, four generated
+    public rows, and two proposals. Both proposal notifications became `SENT`.
 13. Test replay, request-ID conflict, contact-independent duplicate detection,
     the observed three-request bot burst, wrong-origin and malformed requests,
     schema drift, upstream timeouts, and formula-like literal text.
+    Completed 2026-11-17: replay returned the stored result, conflict and two
+    duplicate responses created no extra rows, a missing edit target failed
+    before reservation, and the live HTTP boundary cases failed safely.
+    Formula-like text stayed literal and the public projection remained
+    private-data-free. Automated adapter tests cover schema drift and upstream
+    timeout paths without mutating provider resources.
 14. Trigger and receive one real 100-attempt/10-minute aggregate alert. Verify
     no contributor contact, private edit-proposal text, raw IP, token, or raw
     error string appears in D1, Worker logs, the aggregate alert API, Script
     Properties, or the aggregate alert email. Test the owner-side
     outage/recovery path separately.
+    Completed 2026-11-18: D1 reached 100 aggregate attempts and two accepted
+    submissions; one threshold alert was delivered and ACKed. D1 schema and
+    read-only queries plus the observed alert email remained aggregate-only;
+    checked-in code and tests enforce the same redaction contract for the API,
+    logs, and Script Properties. Three deliberate monitor failures sent the
+    outage email, and one healthy poll after restoration sent the recovery
+    email.
 15. Exercise the kill switch while staging is enabled and confirm new attempts
     fail before rate limiting, Turnstile, Sheets, or telemetry. Leave staging
     disabled after testing.
+    Completed 2026-11-17: after redeploying with the switch disabled, both
+    submission routes returned `503`, preflight returned `204`, and disabled
+    requests changed neither telemetry nor workbook counts. Staging remains
+    disabled.
 16. Record resource names, non-secret settings, test results, and teardown/key
     rotation steps here. Stage 3 remains unauthorized until the Stage 2 gate is
-    explicitly accepted.
+    explicitly accepted. Completed 2026-11-18 in this runbook and `AGENTS.md`.
+
+#### Stage 2 maintenance, rotation, and teardown
+
+- Keep the staging workbook, Worker, D1 database, Turnstile widget, Apps Script,
+  and trigger available for an explicitly authorized Stage 3, but leave
+  `SUBMISSIONS_ENABLED=false` between attended windows.
+- Rotate `ALERT_POLL_SECRET` only in a disabled maintenance window. Update the
+  Worker secret and Apps Script property as one coordinated change, then run one
+  healthy manual poll before ending the window.
+- Rotate `RATE_LIMIT_SECRET` or `REQUEST_HASH_SECRET` only while disabled. A
+  rotation intentionally invalidates existing keyed rate-limit, deduplication,
+  or replay fingerprints; verify fresh fictional submissions before re-enabling.
+- For a Google service-account key rotation, create and validate a replacement,
+  import it into ignored owner-only storage, update the disabled staging Worker,
+  and verify workbook access before disabling and then deleting the replaced
+  key. Never keep the downloaded JSON after import. Follow Google's documented
+  [create, replace, disable, verify, and delete sequence](https://docs.cloud.google.com/iam/docs/key-rotation).
+- For a Turnstile secret rotation, keep submissions disabled, use Cloudflare's
+  widget secret-rotation flow, update the Worker during the documented grace
+  period, verify a real local challenge, and only then consider re-enabling.
+  Cloudflare documents the current
+  [two-hour overlap behavior](https://developers.cloudflare.com/turnstile/troubleshooting/rotate-secret-key/).
+- If staging is abandoned, first keep submissions disabled and preserve any
+  needed aggregate evidence. Then remove the Apps Script trigger, revoke and
+  delete the service-account key, remove the service account's workbook access,
+  and delete only the staging Worker, D1 database, Turnstile widget, workbook,
+  and Google Cloud project after checking every target. No production resource
+  is part of this teardown.
 
 ### Stage 3: local frontend integration
 

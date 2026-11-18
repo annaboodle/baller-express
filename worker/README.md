@@ -184,8 +184,10 @@ before any provisioning or deployment command.
 Run `npm run audit:staging-sheets` before and after attended provider tests.
 The read-only audit uses the ignored staging Google credentials, reads at most
 1,000 rows from each of the three expected tabs, and prints only counts and
-boolean schema/formula/privacy checks. It never prints row content, IDs,
-contact details, tokens, credentials, or the workbook URL.
+boolean schema/formula/privacy checks. Proposal notification state is reported
+only in the fixed aggregate buckets `PENDING`, `RETRY`, `SENT`, `FAILED`,
+`SKIPPED`, `blank`, and `other`. The audit never prints row content, IDs, raw
+status values, contact details, tokens, credentials, or the workbook URL.
 
 For Stage 2 live-provider tests only, `scripts/serve-staging-smoke.mjs` serves a
 separate credential-free harness at exactly `http://localhost:3000`. It is not
@@ -205,7 +207,8 @@ Use only the actual staging Worker origin. The server binds to local IPv4 port
 uses the route's exact Turnstile action and resets the widget for a fresh,
 single-use token. The replay/conflict buttons intentionally use a nonempty
 placeholder because those checks occur before Turnstile. Stop the harness after
-the attended test window.
+the attended test window. Keep staging `SUBMISSIONS_ENABLED=false` between
+attended windows and until the next stage is explicitly authorized.
 
 There is deliberately no custom domain, production route, production Sheet ID,
 or deployment command in this repository yet.

@@ -104,6 +104,24 @@ function populatedRowCount(rows, identityColumn = 0) {
   }).length;
 }
 
+function fixedStatusCounts(rows, column, allowed) {
+  const counts = Object.fromEntries(allowed.map((status) => [status, 0]));
+  counts.blank = 0;
+  counts.other = 0;
+  for (const row of (rows || []).slice(1)) {
+    if (!row?.[0]) continue;
+    const value = row?.[column];
+    if (value === undefined || value === null || value === "") {
+      counts.blank += 1;
+    } else if (Object.hasOwn(counts, value)) {
+      counts[value] += 1;
+    } else {
+      counts.other += 1;
+    }
+  }
+  return Object.freeze(counts);
+}
+
 function actualFormulaCount(unformatted, formulaRendered, maxColumn) {
   let count = 0;
   const rowCount = Math.max(
@@ -198,6 +216,13 @@ export function summarizeStagingWorkbook({ unformatted, formulas }) {
     editProposals: Object.freeze({
       rows: proposalRows,
       schemaMatches: exactHeader(raw.proposals, proposalHeaders),
+      notificationStatuses: fixedStatusCounts(raw.proposals, 12, [
+        "PENDING",
+        "RETRY",
+        "SENT",
+        "FAILED",
+        "SKIPPED",
+      ]),
       formulaCellsInWorkerOwnedColumns: actualFormulaCount(
         raw.proposals,
         rendered.proposals,

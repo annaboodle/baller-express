@@ -1,6 +1,6 @@
 # Baller Express project guide
 
-Last reviewed: 2026-11-17
+Last reviewed: 2026-11-18
 
 ## Keep this file alive
 
@@ -73,13 +73,16 @@ or `gh-pages`.
 
 ## Stage 2 branch status
 
-Stage 2 is in progress on `codex/protected-submissions` and remains isolated
-from production. A disabled staging-only Worker is deployed, but the live site,
-production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
+Stage 2's isolated staging gate was completed on 2026-11-18 on
+`codex/protected-submissions`. The staging-only Worker is deployed with its
+submission kill switch disabled; the live site, production Forms, production
+Sheets, `master`, and `gh-pages` are unchanged. Completing Stage 2 does not
+authorize Stage 3.
 
 - The private native Google Sheet **Baller Express — Stage 2 Staging** has the
   approved three tabs, fictional fixture data only, and timezone `Etc/UTC`.
-  It remains owner-only until a staging-only service account is created.
+  General access remains Restricted; only the owner and the staging-only
+  service account have access.
 - The free Cloudflare D1 database `baller-submissions-staging` was created on
   2026-11-16. Its ID is kept only in the ignored local Wrangler configuration;
   remote migration `0001_stage2.sql` has been applied and verified. It contains
@@ -123,7 +126,9 @@ production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
   four permissions, passed configuration validation, and installed exactly one
   time-driven `pollBallerExpressStage2` trigger. A manual first poll sent the
   fictional staging proposal email and changed its private notification state
-  from `PENDING` to `SENT` with `notified_at` recorded.
+  from `PENDING` to `SENT` with `notified_at` recorded. On 2026-11-18 the owner
+  also received the independent alert after three deliberate polling failures
+  and the recovery email after the valid staging endpoint was restored.
 - Three independent keyed staging secrets were generated into the ignored,
   owner-only local secret store. Wrangler declares exactly seven required
   server secrets. A tested filter creates an owner-only upload file containing
@@ -144,15 +149,35 @@ production Forms, production Sheets, `master`, and `gh-pages` are unchanged.
   at runtime, and never displays or logs verification tokens. It is separate
   from React and is never deployed.
 - The read-only staging workbook auditor fetches bounded ranges and reports
-  only counts and schema/formula/privacy booleans. Its first live baseline saw
-  four source rows, three generated public rows, and one proposal row; all
-  checks passed and no private columns appeared in the generated tab.
-- `npm --prefix worker test` currently passes 87 tests; the D1 migration also
+  only aggregate counts and schema/formula/privacy booleans. Its first live
+  baseline saw four source rows, three generated public rows, and one proposal
+  row; all checks passed and no private columns appeared in the generated tab.
+- During one attended enabled window, a real Turnstile token created exactly
+  one fictional milestone and one edit proposal. A true replay returned the
+  stored result without another row; a changed-payload request-ID conflict and
+  two contact-independent duplicates were rejected. This reproduced the
+  observed three-request burst as one creation plus two duplicate responses.
+  Missing edit targets, wrong origins, malformed JSON, unsupported media, and
+  formula-like input were also handled safely.
+- The final workbook audit found five source rows, four generated public rows,
+  and two proposal rows. Both proposal notifications were `SENT`; the generated
+  tab still contained only the seven public fields, formula spill ownership was
+  intact, and the formula-like submission remained literal text.
+- Aggregate staging telemetry reached exactly 100 attempts and two accepted
+  submissions. The 100-attempt/10-minute alert was emailed and acknowledged;
+  D1 retained only enumerated counters, keyed fingerprints, server-owned IDs,
+  and public replay fields. The owner-side polling outage and recovery emails
+  were then verified separately.
+- The submission switch was returned to `false` and redeployed after the
+  enabled window. Both submission routes again returned the safe `503`, while
+  preflight remained available; disabled requests changed neither telemetry nor
+  workbook counts. The local smoke harness was stopped.
+- `npm --prefix worker test` currently passes 88 tests; the D1 migration also
   loads successfully in SQLite. Local and exported-native workbook formula and
   visual checks pass.
-- Still pending before the Stage 2 gate: run enabled staging privacy, storage,
-  deduplication, notification, high-usage-alert, outage/recovery, and final
-  kill-switch tests.
+- All Stage 2 privacy, storage, security, deduplication, notification,
+  high-usage-alert, outage/recovery, and final kill-switch gates passed. Stage 3
+  remains unauthorized until the owner explicitly approves it.
 
 ## Approved target architecture
 
