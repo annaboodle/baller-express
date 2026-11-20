@@ -1,0 +1,76 @@
+name: Production Pages
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the verified build to the live site
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI: "true"
+      GENERATE_SOURCEMAP: "false"
+      REACT_APP_PRODUCTION_TIMELINE_CSV: ${{ vars.PRODUCTION_TIMELINE_CSV }}
+      REACT_APP_PRODUCTION_WORKER_ORIGIN: ${{ vars.PRODUCTION_WORKER_ORIGIN }}
+      REACT_APP_PRODUCTION_TURNSTILE_SITE_KEY: ${{ vars.PRODUCTION_TURNSTILE_SITE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm ci --prefix worker
+      - run: npm run check
+      - name: Verify the published feed and production build settings
+        if: inputs.publish
+        run: node scripts/check-production-feed.mjs
+      - run: cp CNAME build/CNAME
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+
+  verify-approval:
+    if: ${{ !inputs.publish }}
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - run: echo 'Build verified and environment approval exercised.'
+
+  publish:
+    if: inputs.publish
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Confirm the reviewed revision is still current
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/master" --jq .object.sha)" = "$GITHUB_SHA"
+      - name: Publish approved artifact
+        id: deploy
+        uses: actions/deploy-pages@v4

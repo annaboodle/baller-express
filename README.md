@@ -30,6 +30,13 @@ npm start
 
 The app is available at <http://localhost:3000>.
 
+Stage 3 submission review also needs the two public staging values listed in
+`.env.example`. Copy that file to ignored `.env.development.local`, fill the
+staging Worker origin and Turnstile site key, and restart `npm start`. Use exact
+`http://localhost:3000`; submissions intentionally fail closed at any other
+origin. Leave the staging Worker disabled except during the attended review
+described in [`docs/submissions.md`](docs/submissions.md#stage-3-local-frontend-integration).
+
 Run every local check:
 
 ```sh
@@ -38,10 +45,12 @@ npm run check
 
 The individual frontend commands are `npm run test:ci` and `npm run build`.
 
-## Worker foundation
+## Submission Worker
 
-The credential-free Stage 1 Worker scaffold lives in `worker/`. It must remain
-fail-closed until isolated staging resources are authorized and configured.
+The tested, fail-closed submission API and staging operations live in `worker/`.
+Its real staging resource values and credentials exist only in ignored local or
+provider-managed secret storage. Follow the staged runbook before running any
+provider command or changing the submission kill switch.
 
 ```sh
 npm ci --prefix worker

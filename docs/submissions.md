@@ -1,8 +1,8 @@
 # Submission security and deployment runbook
 
-Status: Stages 1 and 2 complete; Stage 3 not authorized
+Status: Stages 1–3 complete. Stage 4 rehearsal passed and awaits owner review.
 
-Last reviewed: 2026-11-18
+Last reviewed: 2026-11-20
 
 ## Production safety rule
 
@@ -143,7 +143,8 @@ All implementation work occurs on `codex/protected-submissions`.
 Local development uses:
 
 - Frontend at `http://localhost:3000`.
-- Worker at `http://localhost:8787`.
+- Worker-local development may use `http://localhost:8787`; the current Stage 3
+  browser review instead targets the deployed staging `workers.dev` origin.
 - A dedicated free staging Turnstile widget that allows `localhost`; Cloudflare
   dummy keys cannot prove this Worker's required hostname and action checks.
 - A separate staging workbook containing test or sanitized fixture data.
@@ -192,8 +193,8 @@ shutdown of the old Forms requires the applicable later-stage approval.
 ### Stage 2: isolated staging backend and workbook
 
 **Completed 2026-11-18.** The staging submission switch is disabled and all
-production resources remain unchanged. This completion does not authorize
-Stage 3.
+production resources remain unchanged. This completion did not itself authorize
+Stage 3; the owner separately authorized Stage 3 later on 2026-11-18.
 
 Completed locally or in the private staging workbook:
 
@@ -390,8 +391,8 @@ or broader sharing than listed here.
     requests changed neither telemetry nor workbook counts. Staging remains
     disabled.
 16. Record resource names, non-secret settings, test results, and teardown/key
-    rotation steps here. Stage 3 remains unauthorized until the Stage 2 gate is
-    explicitly accepted. Completed 2026-11-18 in this runbook and `AGENTS.md`.
+    rotation steps here. The owner accepted the Stage 2 gate and separately
+    authorized Stage 3 on 2026-11-18. Completed in this runbook and `AGENTS.md`.
 
 #### Stage 2 maintenance, rotation, and teardown
 
@@ -423,20 +424,168 @@ or broader sharing than listed here.
 
 ### Stage 3: local frontend integration
 
-- Replace direct Google Form posts in the feature branch with the staging API.
-- Conditionally mount the forms, add Turnstile, validation, loading/error
-  states, retry-safe request IDs, and immediate milestone-publication UX.
-- Gate: owner reviews desktop and mobile behavior locally; production still
-  uses the old frontend and endpoints.
+**Completed with the owner's desktop/mobile approval on 2026-11-20.** The
+attended frontend integration smoke passed on 2026-11-19. Production still
+uses the old frontend, Forms, and published feeds.
+The staging Worker remains disabled except for an attended fictional-data
+review window.
+
+Implemented on `codex/protected-submissions`:
+
+- Removed both direct Google Forms posts from the feature-branch React forms.
+  `src/submissions.js` now owns the fail-closed staging configuration, safe
+  response parsing, and the exact `/v1/milestones` and `/v1/edit-proposals`
+  requests.
+- Added `SubmissionModal`, so each submission form and its optional private
+  contributor state exist only while that modal is open. Close, backdrop,
+  Escape, focus trapping/restoration, and busy-state dismissal are tested.
+- Added explicitly rendered Turnstile widgets using actions `add_milestone` and
+  `edit_proposal`. Tokens remain in memory, are never rendered or logged, and a
+  fresh challenge runs for every manual retry.
+- Added retry-safe request IDs. An identical retry retains its request ID so the
+  Worker can replay safely; editing the payload creates a new ID. Duplicate and
+  request-conflict outcomes never create a second optimistic event.
+- Added native field constraints plus safe loading, unavailable, timeout,
+  validation, verification, rate-limit, and retry messages. The API sends no
+  browser credentials, refuses redirects, and allowlists the seven public event
+  fields from a milestone response.
+- A successful milestone is inserted immediately into the submitter's local
+  timeline and updates both people-filter lists. A successful edit proposal
+  only shows a private-review confirmation; it never mutates the timeline.
+- Submission result banners use the owner-approved copy from the 2026-11-19
+  review and a short fade-and-slide transition on appearance and dismissal;
+  reduced-motion preferences shorten it to near-instant behavior.
+- Edit controls are disabled on legacy rows without an immutable `event_id`.
+  The browser does not fabricate IDs; Stage 4 migration supplies them.
+- Frontend tests and an optimized production build pass locally. No deployment
+  command has been run.
+
+#### Attended Stage 3 smoke
+
+During an attended 2026-11-19 window, the real React frontend submitted one
+fictional milestone with contributor name and email left blank. The accepted
+milestone appeared immediately in the local timeline, and its fictional person
+appeared in the people filter. The same window submitted one fictional edit
+proposal against that ID-bearing milestone; the approved confirmation banner
+appeared and the visible milestone remained unchanged. The final private
+workbook audit found six source rows, five generated public rows, and three
+proposal rows. All three proposal notifications were `SENT`, and the schemas,
+open-ended formulas, formula ownership, visible-row count, and privacy checks
+passed. The final aggregate-only D1 counts were four request records, two
+dedupe locks, two rate-limit windows, four metric buckets, one alert-state row,
+and one alert-outbox row; request records increased by exactly two from the
+baseline, matching the milestone and edit proposal. The switch was restored to
+`false`, both submission routes returned `503 service_unavailable`, and the
+local review server was stopped. Production resources were unchanged.
+
+#### Stage 3 local setup
+
+1. Copy tracked `.env.example` to ignored `.env.development.local`.
+2. Fill only `REACT_APP_STAGE3_WORKER_ORIGIN` with the path-free HTTPS staging
+   `workers.dev` origin and `REACT_APP_STAGE3_TURNSTILE_SITE_KEY` with the public
+   staging site key. Never add the Turnstile secret or any Google credential.
+3. Start or restart the frontend with `npm start`; Create React App reads these
+   variables only at startup.
+4. Open exactly `http://localhost:3000`, not `127.0.0.1` or another port. The
+   browser integration intentionally fails closed everywhere else.
+5. Keep `SUBMISSIONS_ENABLED=false` during layout-only review. Enable it only
+   for a short attended window using fictional content, then return it to
+   `false` and rerun the aggregate-only staging workbook audit.
+
+#### Stage 3 owner review gate
+
+- Review the add and edit forms at desktop and mobile widths, including long
+  milestone descriptions and the full people list.
+- Confirm both forms are absent from the DOM while closed; opening focus enters
+  the dialog, Tab stays inside it, and close, backdrop, Escape, and focus return
+  behave correctly when no request is running.
+- Confirm the disabled/unavailable, verification, loading, safe error, and
+  manual retry states are understandable. A busy request must not allow the
+  modal to close.
+- In one attended enabled window, submit fictional data and confirm the new
+  milestone appears immediately and new people appear in filters.
+  - Observed on 2026-11-19 with one fictional milestone and one fictional
+    person; contributor name and email were blank.
+- Submit a fictional edit proposal and confirm the private-review message
+  appears while the visible timeline remains unchanged and the owner email is
+  aggregate/private as designed.
+  - Observed on 2026-11-19; the approved banner appeared, the timeline remained
+    unchanged, and the private notifier advanced the proposal to `SENT`.
+- Confirm a legacy row's edit control is visibly disabled, optional contributor
+  contact never appears in the timeline or page source, an unchanged retry does
+  not create another row, and a duplicate receives the safe duplicate message.
+- End the window by restoring `SUBMISSIONS_ENABLED=false`, verifying both routes
+  return the safe unavailable response, and comparing aggregate workbook/D1
+  counts. Stage 3 is complete only after the owner approves this review.
+  - Observed on 2026-11-19; the final aggregate counts are recorded above, both
+    routes returned `503 service_unavailable`, and the local server was stopped.
+
+The local browser review covered 1440 × 900 and 390 × 844. On desktop, both
+forms opened and the edit dialog kept keyboard focus inside, then returned it
+to the edit button on dismissal. At phone width both forms fit horizontally,
+including the edit form for a milestone with 23 people. The contact fields
+stacked on mobile. Dismissing either form removed it from the page, and
+reopening it showed empty contact fields. All 210 legacy edit controls were
+disabled outside the layout preview. Frontend tests covered retries and
+duplicate responses. The live replay and duplicate checks used the Stage 2
+Worker harness. The local browser review made no submissions.
 
 ### Stage 4: migration rehearsal
 
-- Export backups and run a dry-run consolidation into staging.
-- Report source counts, generated IDs, master hidden rows, excluded legacy
-  add-milestone rows with `hide=Y`, excluded `05/31/1970` spam, legitimate
-  legacy submissions, and the exact public schema.
-- Gate: owner explicitly approves the migration report before any production
-  workbook is populated.
+On 2026-11-20 the three original workbooks were exported to private XLSX
+backups. Both live published CSVs were captured separately for comparison. The
+rehearsal used a separate copy of the three-tab staging workbook named
+**Baller Express — Stage 4 Migration Rehearsal**. Drive reported only the
+owner had access, both before loading the data and after verification.
+
+| Legacy source | Snapshot | Rehearsal outcome |
+| --- | ---: | --- |
+| Master, `Timeline` | 124 | All 124 retained. No hidden flag column or hidden data rows. |
+| Add-milestone responses | 188 | 86 visible milestones retained. All 102 rows marked `hide=Y` excluded. Of those, 81 also had the known spam date of 1970-05-31. |
+| Master, `Uncategorized` | 61 | Backed up as off-timeline drafts. |
+| Old edit responses | 130 | Archived privately. No edits applied or queued for a new email. |
+
+The two legacy feeds and the generated tab agreed on all six display fields
+for all 210 rows in source order after date and display-default conversion.
+The generated tab's columns were exactly `event_id`, `date`, `precise`, `event`,
+`people`, `type`, and `size`. All IDs were unique, all 210 original milestone
+references passed the Worker's edit validator, and all 210 native publication
+ranks matched the expected row positions. No known contributor email occurred
+in the projected values. Readback also matched all 13 private source columns.
+
+The rehearsal preserved all 46 approximate dates. Seven blank precision flags
+became `Y` and missing submission sizes became `m`, matching the legacy
+frontend's display defaults. One visible legacy response had no submission
+timestamp. Its timestamp remains blank. Existing timestamps were converted from
+the add-response workbook's `America/New_York` time zone to numeric UTC Sheet
+timestamps. Source attribution stays private.
+
+**Repeat the local comparison.** Use an owner-only snapshot directory under
+the Git-ignored `.migration-private/`, outside the frontend build. Keep the
+exports as `master.xlsx`, `milestones.xlsx`, and `edits.xlsx`. Name the original
+published feeds `master-published.csv` and `milestones-published.csv`. With
+Python 3.9+ and `openpyxl` installed, run:
+
+```sh
+python3 scripts/rehearse-migration.py .migration-private/2026-11-20 --form-time-zone America/New_York
+```
+
+The command reads local files, prints counts, and saves an owner-only
+`rehearsal.json` with the input checksums, literal A:M values and a source-row
+to event-ID mapping. The same frozen inputs reproduce the same IDs. Use a
+fresh snapshot directory at cutover. Match it against the approved mapping
+before writing, especially when a master event or an untimestamped response
+has been edited since the snapshot. New IDs must only be assigned to genuinely
+new milestones. Review ambiguous matches with the owner.
+
+For the native rehearsal, write A:M as typed literal cells in the separate
+private copy. Leave the N2 and generated A2 formulas in place. Clear only the
+copied example proposals, keeping the edit queue empty. Compare the native
+private rows and the actual formula output with the local snapshot. Report
+aggregate counts and schema only in tracked project files.
+
+**Approved 2026-11-20.** The owner approved the 210-row migration and Stage 5 preparation. Production deployment and retirement of the old Forms
+have separate approvals.
 
 ### Stage 5: production infrastructure, still dark
 
@@ -448,6 +597,42 @@ or broader sharing than listed here.
   owner.
 - Gate: owner explicitly approves cutover. No merge or production frontend
   deployment is implied by this stage.
+
+**Verified on 2026-11-20.** The production workbook is a separate restricted
+copy. Its production service account has workbook Editor access and no project
+role. The Sheets API is enabled and Google Cloud billing is unlinked. Rotate
+the uploaded public certificate and the matching Worker secret before
+2027-11-20. A read with that identity matched all 210 source rows against the
+approved snapshot, all 210 generated rows against the seven public fields, and
+an empty proposal queue. The three owner-only protections were verified.
+
+The separate production D1 database has its migration applied. The Managed
+Turnstile widget allows only the live site hostname. The production Worker
+uses the seven isolated secrets and disabled switch from the production
+Wrangler configuration. Direct probes returned 204 for allowed preflight,
+503 for both submission routes, 401 for unsigned polling and 200 with an
+empty alert list for signed polling. All six D1 table counts were zero.
+
+The production-bound notification project has the shared Code.gs installed.
+Set OWNER_EMAIL, PRODUCTION_SPREADSHEET_ID, PRODUCTION_WORKER_URL, and
+ALERT_POLL_SECRET in its Script Properties. Use the production polling secret
+from the local owner-only store. Check the four manifest scopes against
+worker/apps-script/appsscript.json, run setupBallerExpressProductionTrigger
+as the owner, then verify one five-minute production trigger and a successful
+poll. On 2026-11-20 the owner saved the four properties, reviewed and
+authorized the four expected permissions, and verified one time-based
+`pollBallerExpressProduction` trigger. The manual production poll completed
+in two seconds. The owner confirmed `consecutiveFailures` was zero in
+`BALLER_WORKER_HEALTH_V1` after the run.
+
+The manual Production Pages workflow defaults to a verification-only run.
+GitHub requires owner review of the production environment, allows only the
+master branch, and disables admin bypass. Two public repository variables
+supply the Worker origin and Turnstile site key. Set PRODUCTION_TIMELINE_CSV
+to the signed-out-verified, single generated tab when publication is approved.
+A publication run checks the feed schema and current master revision. The
+workflow can first be dispatched after reaching the default branch. Pages
+still serves the legacy gh-pages branch.
 
 ### Stage 6: controlled cutover
 
@@ -550,13 +735,26 @@ production publication.
 
 ## Production cutover
 
+The owner authorized cutover on 2026-11-20. Fresh backups of all three legacy
+Sheets and both published feeds reproduced the approved 210 rows, their IDs,
+and the archived count of 130 edit responses. Source and Pages rollback SHAs
+are saved with the private cutover snapshot. The populated production workbook
+already matches these rows.
+
+The owner accepts a brief interruption to the public timeline if it makes the
+switch simpler. Back up the data, record rollback revisions, and test the Worker
+in advance. If downtime helps, use it during the frontend switch, then check
+the new build at the usual public URL. Direct links to the old Google Forms
+can still accept responses while the timeline is offline.
+
 1. Export backups of the current master, milestone-response, and edit-response
    Sheets.
 2. Record the current `master` and `gh-pages` commit SHAs.
-3. Populate the new `Timeline Source` through a dry-run migration.
+3. Run the rehearsed migration in dry-run mode against the cutover snapshot.
 4. Exclude add-milestone response rows whose legacy `hide` value is `Y` and the
    confirmed `05/31/1970` bot submissions. Report master hidden rows separately
-   and review all migration counts before writing.
+   and review all migration counts before populating the approved production
+   workbook.
 5. Verify `Published Timeline (Generated)` in a signed-out browser and confirm
    private tabs cannot be accessed by changing the tab identifier.
 6. Deploy and test the production Worker while the existing website still uses
@@ -565,9 +763,12 @@ production publication.
    environment prompt.
 8. Smoke-test timeline loading, add milestone, edit proposal, email delivery,
    mobile layout, duplicate handling, and failure messages.
-9. Only after smoke tests pass, close both old Google Forms and stop publishing
-   both old spreadsheets.
-10. Keep the old Sheets private as rollback archives.
+9. After the smoke tests pass and the owner gives final confirmation, close
+   both old Google Forms and stop publishing both old spreadsheets.
+10. Compare the closed Forms' final responses with the cutover snapshot.
+    Account for late milestones under the same inclusion rules and keep late
+    edit proposals in private review. Check for duplicates before importing
+    any missing rows. Keep the old Sheets private as rollback archives.
 11. Update `AGENTS.md` and this document from approved direction to deployed
     current behavior.
 

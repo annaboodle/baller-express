@@ -1,19 +1,19 @@
 /**
  * @OnlyCurrentDoc
  *
- * Baller Express Stage 2 staging notifications.
+ * Baller Express private workbook notifications.
  *
- * Bind this script only to the private staging workbook. Set these Script
+ * Bind this script to the corresponding private workbook. Set these Script
  * Properties in the Apps Script project settings; never put their values in
  * this file:
  *
  * - OWNER_EMAIL
- * - STAGING_SPREADSHEET_ID
- * - STAGING_WORKER_URL (https://... with no trailing slash)
+ * - STAGING_SPREADSHEET_ID or PRODUCTION_SPREADSHEET_ID
+ * - STAGING_WORKER_URL or PRODUCTION_WORKER_URL (HTTPS origin)
  * - ALERT_POLL_SECRET (the same 32+ character Worker secret)
  *
  * The five-minute trigger is installed only when the owner manually runs
- * setupBallerExpressStage2Trigger().
+ * setupBallerExpressStage2Trigger() or setupBallerExpressProductionTrigger().
  */
 
 var BALLER_EDIT_SHEET_ = "Edit Proposals";
@@ -47,32 +47,44 @@ var BALLER_OUTAGE_COOLDOWN_MS_ = 6 * 60 * 60 * 1000;
 var BALLER_ALERT_MEMORY_MS_ = 7 * 24 * 60 * 60 * 1000;
 
 function setupBallerExpressStage2Trigger() {
+  installBallerTrigger_("STAGING", "pollBallerExpressStage2");
+}
+
+function setupBallerExpressProductionTrigger() {
+  installBallerTrigger_("PRODUCTION", "pollBallerExpressProduction");
+}
+
+function installBallerTrigger_(environment, handler) {
   ScriptApp.requireAllScopes(ScriptApp.AuthMode.FULL);
-  ballerConfiguration_();
-  ballerEditSheet_();
-  ScriptApp.getProjectTriggers().forEach(function (trigger) {
-    if (trigger.getHandlerFunction() === "pollBallerExpressStage2") {
-      ScriptApp.deleteTrigger(trigger);
-    }
+  var config = ballerConfiguration_(environment);
+  ballerEditSheet_(config.spreadsheetId);
+  var existing = ScriptApp.getProjectTriggers().filter(function (trigger) {
+    return trigger.getHandlerFunction() === handler;
   });
-  ScriptApp.newTrigger("pollBallerExpressStage2")
-    .timeBased()
-    .everyMinutes(5)
-    .create();
+  if (existing.length === 1) return;
+  ScriptApp.newTrigger(handler).timeBased().everyMinutes(5).create();
+  existing.forEach(function (trigger) { ScriptApp.deleteTrigger(trigger); });
 }
 
 function validateBallerExpressStage2Configuration() {
   ScriptApp.requireAllScopes(ScriptApp.AuthMode.FULL);
-  ballerConfiguration_();
-  ballerEditSheet_();
+  ballerEditSheet_(ballerConfiguration_("STAGING").spreadsheetId);
   return "Stage 2 staging notification configuration is valid.";
 }
 
 function pollBallerExpressStage2() {
+  pollBallerWorkbook_("STAGING");
+}
+
+function pollBallerExpressProduction() {
+  pollBallerWorkbook_("PRODUCTION");
+}
+
+function pollBallerWorkbook_(environment) {
   var lock = LockService.getScriptLock();
   if (!lock.tryLock(1000)) return;
   try {
-    var config = ballerConfiguration_();
+    var config = ballerConfiguration_(environment);
     processBallerEditNotifications_(config);
     try {
       processBallerAggregateAlerts_(config);
@@ -85,25 +97,30 @@ function pollBallerExpressStage2() {
   }
 }
 
-function ballerConfiguration_() {
+function ballerConfiguration_(environment) {
   var properties = PropertiesService.getScriptProperties();
   var config = {
     ownerEmail: properties.getProperty("OWNER_EMAIL"),
-    spreadsheetId: properties.getProperty("STAGING_SPREADSHEET_ID"),
-    workerUrl: properties.getProperty("STAGING_WORKER_URL"),
+    label: environment === "PRODUCTION" ? "production" : "staging",
+    spreadsheetId: properties.getProperty(environment + "_SPREADSHEET_ID"),
+    workerUrl: properties.getProperty(environment + "_WORKER_URL"),
     alertSecret: properties.getProperty("ALERT_POLL_SECRET"),
   };
   if (!config.ownerEmail || config.ownerEmail.indexOf("@") < 1) {
     throw new Error("OWNER_EMAIL is missing or invalid.");
   }
   if (!config.spreadsheetId) {
-    throw new Error("STAGING_SPREADSHEET_ID is missing.");
+    throw new Error(environment + "_SPREADSHEET_ID is missing.");
   }
   if (
     !config.workerUrl ||
     !/^https:\/\/[^/]+(?:\:[0-9]+)?$/.test(config.workerUrl)
   ) {
-    throw new Error("STAGING_WORKER_URL must be an HTTPS origin.");
+    throw new Error(environment + "_WORKER_URL must be an HTTPS origin.");
+  }
+  if (environment === "PRODUCTION" &&
+      !/^https:\/\/baller-submissions-production\.[a-z0-9-]+\.workers\.dev$/.test(config.workerUrl)) {
+    throw new Error("The production alert monitor requires the production Worker.");
   }
   if (!config.alertSecret || config.alertSecret.length < 32) {
     throw new Error("ALERT_POLL_SECRET must contain at least 32 characters.");
@@ -111,14 +128,11 @@ function ballerConfiguration_() {
   return config;
 }
 
-function ballerEditSheet_() {
-  var spreadsheetId = PropertiesService.getScriptProperties().getProperty(
-    "STAGING_SPREADSHEET_ID",
-  );
+function ballerEditSheet_(spreadsheetId) {
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   if (!spreadsheet || spreadsheet.getId() !== spreadsheetId) {
     throw new Error(
-      "This script must remain bound to the configured staging workbook.",
+      "This script must remain bound to the configured workbook.",
     );
   }
   var sheet = spreadsheet.getSheetByName(BALLER_EDIT_SHEET_);
@@ -138,7 +152,7 @@ function ballerEditSheet_() {
 }
 
 function processBallerEditNotifications_(config) {
-  var sheet = ballerEditSheet_();
+  var sheet = ballerEditSheet_(config.spreadsheetId);
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return;
   var rows = sheet
@@ -169,9 +183,9 @@ function processBallerEditNotifications_(config) {
     try {
       MailApp.sendEmail({
         to: config.ownerEmail,
-        subject: "[Baller Express staging] Edit proposal " + proposalId,
-        body: ballerProposalEmailBody_(row),
-        name: "Baller Express staging",
+        subject: "[Baller Express " + config.label + "] Edit proposal " + proposalId,
+        body: ballerProposalEmailBody_(row, config.label),
+        name: "Baller Express " + config.label,
       });
       delivered[proposalId] = Date.now();
       writeBallerJsonProperty_(BALLER_DELIVERED_PROPOSALS_KEY_, delivered);
@@ -206,9 +220,9 @@ function processBallerEditNotifications_(config) {
   writeBallerJsonProperty_(BALLER_DELIVERED_PROPOSALS_KEY_, delivered);
 }
 
-function ballerProposalEmailBody_(row) {
+function ballerProposalEmailBody_(row, label) {
   return [
-    "A new edit proposal is waiting in the private staging workbook.",
+    "A new edit proposal is waiting in the private " + label + " workbook.",
     "",
     "Proposal ID: " + row[0],
     "Original event ID: " + row[4],
@@ -256,9 +270,9 @@ function processBallerAggregateAlerts_(config) {
     try {
       MailApp.sendEmail({
         to: config.ownerEmail,
-        subject: "[Baller Express staging] Usage alert: " + alert.rule,
-        body: ballerAggregateEmailBody_(alert),
-        name: "Baller Express staging",
+        subject: "[Baller Express " + config.label + "] Usage alert: " + alert.rule,
+        body: ballerAggregateEmailBody_(alert, config.label),
+        name: "Baller Express " + config.label,
       });
       delivered[alert.alertId] = Date.now();
       writeBallerJsonProperty_(BALLER_DELIVERED_ALERTS_KEY_, delivered);
@@ -301,9 +315,9 @@ function ballerValidAggregateAlert_(alert) {
   );
 }
 
-function ballerAggregateEmailBody_(alert) {
+function ballerAggregateEmailBody_(alert, label) {
   return [
-    "The staging submission service crossed a configured safety threshold.",
+    "The " + label + " submission service crossed a configured safety threshold.",
     "",
     "Alert ID: " + alert.alertId,
     "Rule: " + alert.rule,
@@ -342,11 +356,11 @@ function ballerWorkerRequest_(config, path, payload) {
     followRedirects: false,
   });
   if (result.getResponseCode() !== 200) {
-    throw new Error("The staging alert endpoint is unavailable.");
+    throw new Error("The " + config.label + " alert endpoint is unavailable.");
   }
   var parsed = JSON.parse(result.getContentText());
   if (!parsed || typeof parsed !== "object") {
-    throw new Error("The staging alert response is invalid.");
+    throw new Error("The " + config.label + " alert response is invalid.");
   }
   return parsed;
 }
@@ -367,15 +381,15 @@ function recordBallerWorkerFailure_(config) {
     try {
       MailApp.sendEmail({
         to: config.ownerEmail,
-        subject: "[Baller Express staging] Worker alert polling is unavailable",
+        subject: "[Baller Express " + config.label + "] Worker alert polling is unavailable",
         body: [
-          "The owner-side staging monitor could not reach or authenticate the",
+          "The owner-side " + config.label + " monitor could not reach or authenticate the",
           "aggregate alert endpoint three or more consecutive times.",
           "",
-          "Submissions should be treated as unavailable until staging health",
+          "Submissions should be treated as unavailable until " + config.label + " health",
           "is verified. No form payload or contact data is included here.",
         ].join("\n"),
-        name: "Baller Express staging",
+        name: "Baller Express " + config.label,
       });
       state.alertSent = true;
       state.lastAlertAt = now;
@@ -396,9 +410,9 @@ function recordBallerWorkerHealthy_(config) {
     try {
       MailApp.sendEmail({
         to: config.ownerEmail,
-        subject: "[Baller Express staging] Alert polling recovered",
-        body: "The owner-side staging monitor reached the aggregate alert endpoint again.",
-        name: "Baller Express staging",
+        subject: "[Baller Express " + config.label + "] Alert polling recovered",
+        body: "The owner-side " + config.label + " monitor reached the aggregate alert endpoint again.",
+        name: "Baller Express " + config.label,
       });
       state.alertSent = false;
       state.lastAlertAt = 0;

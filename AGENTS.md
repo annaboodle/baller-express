@@ -1,6 +1,6 @@
 # Baller Express project guide
 
-Last reviewed: 2026-11-18
+Last reviewed: 2026-11-20
 
 ## Keep this file alive
 
@@ -26,6 +26,11 @@ group: introductions, moves, trips, weddings, babies, and other events.
   owner-controlled publication fields; the browser cannot set them.
 - Proposed edits remain private for manual review and trigger an owner email.
 - Contributor name and email are optional and must remain private.
+- Preserve the original website's UX, UI, and copy exactly while implementing
+  security or infrastructure work. Do not add, remove, reword, restyle, or
+  rearrange anything user-visible without the owner's explicit prior approval.
+  If a technical requirement appears to need a user-visible change, show the
+  proposed wording or layout to the owner and wait for approval before editing.
 
 ## Current implementation
 
@@ -76,8 +81,8 @@ or `gh-pages`.
 Stage 2's isolated staging gate was completed on 2026-11-18 on
 `codex/protected-submissions`. The staging-only Worker is deployed with its
 submission kill switch disabled; the live site, production Forms, production
-Sheets, `master`, and `gh-pages` are unchanged. Completing Stage 2 does not
-authorize Stage 3.
+Sheets, `master`, and `gh-pages` are unchanged. Stage 2 did not itself authorize
+Stage 3; the owner separately authorized Stage 3 on 2026-11-18.
 
 - The private native Google Sheet **Baller Express — Stage 2 Staging** has the
   approved three tabs, fictional fixture data only, and timezone `Etc/UTC`.
@@ -176,8 +181,87 @@ authorize Stage 3.
   loads successfully in SQLite. Local and exported-native workbook formula and
   visual checks pass.
 - All Stage 2 privacy, storage, security, deduplication, notification,
-  high-usage-alert, outage/recovery, and final kill-switch gates passed. Stage 3
-  remains unauthorized until the owner explicitly approves it.
+  high-usage-alert, outage/recovery, and final kill-switch gates passed.
+
+## Stage 3 branch status
+
+The owner approved the desktop and mobile review on 2026-11-20, completing
+Stage 3 and authorizing the Stage 4 staging migration rehearsal. The attended
+frontend-to-staging integration smoke passed on 2026-11-19. The frontend
+changes are on `codex/protected-submissions`; production still uses the legacy
+Forms and feeds.
+The staging Worker remains disabled outside an attended review window.
+
+- `src/submissions.js` is the fail-closed browser configuration and API boundary.
+  Local review requires `REACT_APP_STAGE3_WORKER_ORIGIN` and
+  `REACT_APP_STAGE3_TURNSTILE_SITE_KEY` in an ignored local environment file.
+  The browser accepts them only at exact `http://localhost:3000` and only with a
+  path-free HTTPS `workers.dev` Worker origin.
+- Submission forms are conditionally mounted through `SubmissionModal`; no form
+  or contributor-contact state exists in the DOM while its modal is closed.
+- Each form uses an explicitly rendered Turnstile widget with the exact Worker
+  action, server-bound request validation, loading/error states, a fresh token
+  for every attempt, and one stable request ID for an unchanged manual retry.
+- The browser posts only to `/v1/milestones` and `/v1/edit-proposals`. A request
+  times out safely, follows no redirects, sends no credentials, and exposes only
+  allowlisted public event fields from a successful response.
+- A newly accepted milestone is inserted optimistically into the local timeline
+  and its people are added to both filter lists. An accepted edit proposal only
+  shows a private-review confirmation and never changes the timeline.
+- Submission result banners use the owner's approved 2026-11-19 copy and a
+  short fade-and-slide transition on appearance and dismissal. Reduced-motion
+  preferences shorten that transition to near-instant behavior.
+- Legacy production-feed rows do not have immutable `event_id` values. Their
+  edit controls remain disabled until migration rather than inventing IDs in the
+  browser; staged or migrated ID-bearing rows can open the edit form.
+- During an attended 2026-11-19 window, the real React frontend submitted one
+  fictional milestone with contributor name and email left blank. The accepted
+  milestone appeared immediately in the local timeline, and its fictional
+  person appeared in the people filter. The same window submitted one fictional
+  edit proposal against that ID-bearing milestone; the approved confirmation
+  banner appeared and the visible milestone remained unchanged. The final
+  private workbook audit found six source rows, five generated public rows, and
+  three proposal rows; all three proposal notifications were `SENT`, and every
+  schema, formula-ownership, and privacy check passed. The aggregate-only D1
+  audit found four request records, up from two at baseline and matching exactly
+  the two accepted submissions; retention-managed table counts remained safe.
+  The switch was restored to `false`, both submission routes returned the safe
+  `503 service_unavailable` response, and the local review server was stopped.
+- Automated frontend tests, the production build, the attended frontend
+  integration smoke, and the desktop/mobile review passed. See
+  `docs/submissions.md` for the review results.
+
+## Stage 4 branch status
+
+The 2026-11-20 migration rehearsal passed in a separate, owner-only native
+Google Sheet. All 210 visible milestones matched the two legacy feeds, with
+210 distinct event IDs and exactly seven generated public columns. The
+rehearsal preserved the original private contributor data in the source tab.
+Historical edit responses and the master's off-timeline drafts are backed up
+separately. The Stage 2 workbook still serves fictional fixtures only.
+
+The owner approved the migration report and production preparation on 2026-11-20. See the Stage 4 section of `docs/submissions.md` for the exclusions,
+backup and ID mapping procedure, and checks.
+
+## Stage 5 production preparation
+
+The restricted production workbook matches all 210 approved source and generated
+rows. Its seven-column projection, three owner protections, and empty edit
+queue were verified. The separate production service account can read the
+workbook. The production Worker is deployed with submissions disabled. Its
+two submission routes returned 503 and the signed alert poll reached D1.
+All six application tables were empty after verification.
+
+The manual Pages workflow is on the feature branch. The GitHub production
+environment requires the owner, restricts deployments to master, and disables
+admin bypass. The production notification code is saved in the bound project.
+The owner configured the four Script Properties, authorized the notifier, and
+verified one time-based `pollBallerExpressProduction` trigger. The manual
+poll completed with zero consecutive Worker polling failures on 2026-11-20.
+The owner authorized the controlled cutover that day. Fresh private exports
+reproduced all 210 approved rows and IDs. The owner confirmed no new submissions
+or edits. Closing the legacy Forms awaits final confirmation after smoke tests.
+See the Stage 5 section in `docs/submissions.md`.
 
 ## Approved target architecture
 
@@ -282,6 +366,9 @@ silently start paid usage.
   deployment workflow is verified.
 - Do not change the GitHub Pages source or `gh-pages` deployment behavior until
   the manual replacement workflow is ready and the cutover is approved.
+- The owner accepts a brief interruption to the public timeline during an
+  approved production cutover if it simplifies the switch. See the production
+  cutover checklist in `docs/submissions.md`.
 
 ## Run and verify the current frontend
 
