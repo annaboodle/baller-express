@@ -83,6 +83,15 @@
       top: 20px;
       right: 20px;
       z-index: 3;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+
+      &:disabled {
+        cursor: wait;
+        opacity: 0.45;
+      }
 
       @media (max-width: $break-mobile) {
         top: 24px;

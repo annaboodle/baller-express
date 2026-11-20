@@ -1,146 +1,211 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
+
+import TurnstileWidget from "./TurnstileWidget";
+import useVerifiedSubmission from "../hooks/useVerifiedSubmission";
+import { parsePeople, toIsoDate } from "../submissions";
 
 export default function SubmitEditForm({
-  onSubmit,
-  milestoneDateToSubmit,
-  dateCheck,
-  updateDateCheck,
-  milestonePeopleToSubmit,
-  peopleCheck,
-  updatePeopleCheck,
-  milestoneDescToSubmit,
-  descCheck,
-  updateDescCheck,
-  editEventDesc,
-  updateEditEventDesc,
+  submissionConfig,
+  submissionApi,
+  milestone,
+  onAccepted,
+  onDuplicate,
+  onBusyChange,
 }) {
-  return (
-    <form
-      className="form"
-      action="https://docs.google.com/forms/u/1/d/e/1FAIpQLSe8ZGjkYfwGaKkZZvqIzzJ23fkaQjVy4rH3tVbhC5zjHUN1Gw/formResponse"
-      method="post"
-      target="hidden_iframe"
-      onSubmit={() => {
-        "submitted=true;";
-        onSubmit();
-        // updateEditModalOpen(false).then(clearEditFormFields());
-      }}
-    >
-      <h2 className="form-title">Submit edits to this milestone</h2>
+  const controllerRef = useRef(null);
+  const [verificationReady, setVerificationReady] = useState(false);
+  const [dateChecked, setDateChecked] = useState(false);
+  const [peopleChecked, setPeopleChecked] = useState(false);
+  const [descriptionChecked, setDescriptionChecked] = useState(false);
+  const [requestedChange, setRequestedChange] = useState("");
+  const [contributorName, setContributorName] = useState("");
+  const [contributorEmail, setContributorEmail] = useState("");
 
-      <div className="form-field form-field--checkbox-wrap">
-        <p className="form-label">What needs to be edited?</p>
+  const flow = useVerifiedSubmission({
+    submit: submissionApi.submitEditProposal,
+    onSuccess: onAccepted,
+    onDuplicate,
+  });
+
+  useEffect(() => {
+    onBusyChange(flow.busy);
+  }, [flow.busy, onBusyChange]);
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    if (!submissionConfig.available) {
+      flow.setLocalError(submissionConfig.message);
+      return;
+    }
+
+    const fields = [
+      ...(dateChecked ? ["date"] : []),
+      ...(descriptionChecked ? ["description"] : []),
+      ...(peopleChecked ? ["people"] : []),
+    ];
+    if (fields.length === 0) {
+      flow.setLocalError("Choose at least one field to edit.");
+      return;
+    }
+
+    flow.begin(
+      {
+        original: {
+          eventId: milestone.event_id,
+          date: toIsoDate(milestone.date),
+          description: milestone.event,
+          people: parsePeople(milestone.people),
+        },
+        fields,
+        requestedChange,
+        ...(contributorName.trim()
+          ? { contributorName: contributorName.trim() }
+          : {}),
+        ...(contributorEmail.trim()
+          ? { contributorEmail: contributorEmail.trim() }
+          : {}),
+      },
+      controllerRef.current,
+    );
+  }
+
+  return (
+    <form className="form" onSubmit={handleSubmit} aria-busy={flow.busy}>
+      <h2 className="form-title" id="edit-milestone-title">
+        Propose an edit
+      </h2>
+
+      {!submissionConfig.available && (
+        <p className="form-alert" role="alert">
+          {submissionConfig.message}
+        </p>
+      )}
+
+      <fieldset className="form-fieldset form-field--checkbox-wrap">
+        <legend className="form-label">What needs to be edited?</legend>
         <div className="form-field form-field--checkbox form-field--checkbox-full">
           <label className="checkbox-container">
-            <div className="submit-wrap">
-              <span className="submit-label">The date of the milestone: </span>
-              <span className="submit-data">{milestoneDateToSubmit}</span>
-            </div>
+            <span className="submit-wrap">
+              <span className="submit-label">The date of the milestone:</span>
+              <span className="submit-data">{milestone.date}</span>
+            </span>
             <input
-              name="entry.1414516352"
               type="checkbox"
-              value="The date of the milestone"
-              checked={dateCheck}
-              onChange={(e) => {
-                updateDateCheck(e.target.checked);
-              }}
+              checked={dateChecked}
+              onChange={(event) => setDateChecked(event.target.checked)}
             />
             <span className="checkmark" />
           </label>
         </div>
         <div className="form-field form-field--checkbox form-field--checkbox-full">
           <label className="checkbox-container">
-            <div className="submit-wrap">
-              <span className="submit-label">The people involved: </span>
-              <span className="submit-data">{milestonePeopleToSubmit}</span>
-            </div>
+            <span className="submit-wrap">
+              <span className="submit-label">The people involved:</span>
+              <span className="submit-data">{milestone.people}</span>
+            </span>
             <input
-              name="entry.1414516352"
               type="checkbox"
-              value="The people involved"
-              checked={peopleCheck}
-              onChange={(e) => {
-                updatePeopleCheck(e.target.checked);
-              }}
+              checked={peopleChecked}
+              onChange={(event) => setPeopleChecked(event.target.checked)}
             />
             <span className="checkmark" />
           </label>
         </div>
         <div className="form-field form-field--checkbox form-field--checkbox-full">
           <label className="checkbox-container">
-            <div className="submit-wrap">
-              <span className="submit-label">The description: </span>
-              <span className="submit-data">{milestoneDescToSubmit}</span>
-            </div>
+            <span className="submit-wrap">
+              <span className="submit-label">The description:</span>
+              <span className="submit-data">{milestone.event}</span>
+            </span>
             <input
-              name="entry.1414516352"
               type="checkbox"
-              value="The description"
-              checked={descCheck}
-              onChange={(e) => {
-                updateDescCheck(e.target.checked);
-              }}
+              checked={descriptionChecked}
+              onChange={(event) => setDescriptionChecked(event.target.checked)}
             />
             <span className="checkmark" />
           </label>
         </div>
-      </div>
+      </fieldset>
 
       <div className="form-field">
-        <label className="form-label">What needs to be updated?</label>
+        <label className="form-label" htmlFor="requested-change">
+          What should be updated?
+        </label>
         <textarea
-          name="entry.1629872213"
-          type="text"
-          value={editEventDesc}
-          onChange={(e) => {
-            updateEditEventDesc(e.target.value);
-          }}
+          id="requested-change"
+          value={requestedChange}
+          onChange={(event) => setRequestedChange(event.target.value)}
+          required
+          maxLength="1000"
         />
       </div>
 
       <div className="form-flex">
         <div className="form-field">
-          <label className="form-label">Your name</label>
-          <input name="entry.867338912" type="text" />
-        </div>
-        <div className="form-field">
-          <label className="form-label">Your email</label>
-          <input name="entry.1913191690" type="email" />
-        </div>
-      </div>
-
-      {/* stuff to prepopulate */}
-      <div className="hide">
-        <div className="form-field">
-          <label>milestone date</label>
+          <label className="form-label" htmlFor="edit-contributor-name">
+            Your name
+          </label>
           <input
-            readOnly
-            name="entry.198487940"
+            id="edit-contributor-name"
+            value={contributorName}
+            onChange={(event) => setContributorName(event.target.value)}
             type="text"
-            value={milestoneDateToSubmit}
+            maxLength="80"
+            autoComplete="name"
           />
         </div>
         <div className="form-field">
-          <label>milestone description</label>
+          <label className="form-label" htmlFor="edit-contributor-email">
+            Your email
+          </label>
           <input
-            readOnly
-            name="entry.1640389616"
-            type="text"
-            value={milestoneDescToSubmit}
-          />
-        </div>
-        <div className="form-field">
-          <label>milestone people</label>
-          <input
-            readOnly
-            name="entry.635908298"
-            type="text"
-            value={milestonePeopleToSubmit}
+            id="edit-contributor-email"
+            value={contributorEmail}
+            onChange={(event) => setContributorEmail(event.target.value)}
+            type="email"
+            maxLength="254"
+            autoComplete="email"
           />
         </div>
       </div>
 
-      <input type="submit" value="Submit" />
+      {submissionConfig.available && (
+        <TurnstileWidget
+          siteKey={submissionConfig.siteKey}
+          action="edit_proposal"
+          onReady={(controller) => {
+            controllerRef.current = controller;
+            setVerificationReady(Boolean(controller));
+          }}
+          onToken={(token) =>
+            flow.acceptToken(token, controllerRef.current)
+          }
+          onFailure={(message) =>
+            flow.failChallenge(message, controllerRef.current)
+          }
+        />
+      )}
+
+      {flow.busy && (
+        <p className="form-status" role="status">
+          Verifying and sending your edit proposal…
+        </p>
+      )}
+      {flow.error && (
+        <p className="form-alert" role="alert">
+          {flow.error}
+        </p>
+      )}
+
+      <button
+        className="form-submit"
+        type="submit"
+        disabled={
+          flow.busy || !submissionConfig.available || !verificationReady
+        }
+      >
+        {flow.busy ? "Submitting…" : "Submit edit proposal"}
+      </button>
     </form>
   );
 }

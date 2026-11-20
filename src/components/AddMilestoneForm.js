@@ -1,7 +1,17 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
+
+import TurnstileWidget from "./TurnstileWidget";
+import useVerifiedSubmission from "../hooks/useVerifiedSubmission";
+import { normalizePeople, SubmissionError } from "../submissions";
+
+const MILESTONE_TYPES = ["event", "intro", "move", "trip"];
 
 export default function AddMilestoneForm({
-  onSubmit,
+  submissionConfig,
+  submissionApi,
+  onAccepted,
+  onDuplicate,
+  onBusyChange,
   addEventType,
   updateAddEventType,
   addEventDate,
@@ -11,117 +21,119 @@ export default function AddMilestoneForm({
   addEventDesc,
   updateAddEventDesc,
   addEventCheckboxes,
+  selectedPeople,
   addEventOtherPeople,
   updateAddEventOtherPeople,
-  createStringOfAllPeopleInAddEvent,
 }) {
-  return (
-    <form
-      className="form"
-      action="https://docs.google.com/forms/u/1/d/e/1FAIpQLSfUF2D2Yh3tJgiAa4tUAjNqnzfFBiKeGe9MdibIehRlPSD4Kw/formResponse"
-      method="post"
-      target="hidden_iframe"
-      onSubmit={() => {
-        "submitted=true;";
-        onSubmit();
-      }}
-    >
-      <h2 className="form-title">Add a milestone</h2>
-      <p className="form-label">What type of milestone is it?</p>
-      <div className="form-field form-field--radio">
-        <label className="radio-container">
-          event
-          <input
-            name="entry.465797031"
-            type="radio"
-            value="event"
-            checked={addEventType === "event" ? true : false}
-            onChange={(e) => {
-              if (e.target.checked) {
-                updateAddEventType("event");
-              }
-            }}
-          />
-          <span className="checkmark" />
-        </label>
-      </div>
-      <div className="form-field form-field--radio">
-        <label className="radio-container">
-          intro
-          <input
-            name="entry.465797031"
-            type="radio"
-            value="intro"
-            checked={addEventType === "intro" ? true : false}
-            onChange={(e) => {
-              if (e.target.checked) {
-                updateAddEventType("intro");
-              }
-            }}
-          />
-          <span className="checkmark" />
-        </label>
-      </div>
-      <div className="form-field form-field--radio">
-        <label className="radio-container">
-          move
-          <input
-            name="entry.465797031"
-            type="radio"
-            value="move"
-            checked={addEventType === "move" ? true : false}
-            onChange={(e) => {
-              if (e.target.checked) {
-                updateAddEventType("move");
-              }
-            }}
-          />
-          <span className="checkmark" />
-        </label>
-      </div>
-      <div className="form-field form-field--radio">
-        <label className="radio-container">
-          trip
-          <input
-            name="entry.465797031"
-            type="radio"
-            value="trip"
-            checked={addEventType === "trip" ? true : false}
-            onChange={(e) => {
-              if (e.target.checked) {
-                updateAddEventType("trip");
-              }
-            }}
-          />
-          <span className="checkmark" />
-        </label>
-      </div>
+  const controllerRef = useRef(null);
+  const [verificationReady, setVerificationReady] = useState(false);
+  const [contributorName, setContributorName] = useState("");
+  const [contributorEmail, setContributorEmail] = useState("");
 
-      {/* date - first one is to use date picker, doesn't submit */}
+  const flow = useVerifiedSubmission({
+    submit: submissionApi.submitMilestone,
+    onSuccess: onAccepted,
+    onDuplicate,
+  });
+
+  useEffect(() => {
+    onBusyChange(flow.busy);
+  }, [flow.busy, onBusyChange]);
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    if (!submissionConfig.available) {
+      flow.setLocalError(submissionConfig.message);
+      return;
+    }
+
+    try {
+      const people = normalizePeople(selectedPeople, addEventOtherPeople);
+      if (addEventDate < "1971-01-01") {
+        throw new SubmissionError(
+          "invalid_date",
+          "Choose a date on or after January 1, 1971.",
+        );
+      }
+      flow.begin(
+        {
+          type: addEventType,
+          date: addEventDate,
+          approximate: addEventPrecise,
+          description: addEventDesc,
+          people,
+          ...(contributorName.trim()
+            ? { contributorName: contributorName.trim() }
+            : {}),
+          ...(contributorEmail.trim()
+            ? { contributorEmail: contributorEmail.trim() }
+            : {}),
+        },
+        controllerRef.current,
+      );
+    } catch (error) {
+      flow.setLocalError(error);
+    }
+  }
+
+  return (
+    <form className="form" onSubmit={handleSubmit} aria-busy={flow.busy}>
+      <h2 className="form-title" id="add-milestone-title">
+        Add a milestone
+      </h2>
+
+      {!submissionConfig.available && (
+        <p className="form-alert" role="alert">
+          {submissionConfig.message}
+        </p>
+      )}
+
+      <fieldset className="form-fieldset">
+        <legend className="form-label">What type of milestone is it?</legend>
+        {MILESTONE_TYPES.map((type) => (
+          <div className="form-field form-field--radio" key={type}>
+            <label className="radio-container">
+              {type}
+              <input
+                name="milestone-type"
+                type="radio"
+                value={type}
+                required
+                checked={addEventType === type}
+                onChange={() => updateAddEventType(type)}
+              />
+              <span className="checkmark" />
+            </label>
+          </div>
+        ))}
+      </fieldset>
+
       <div className="form-flex form-flex-date">
         <div className="form-field">
-          <label className="form-label">When did it happen?</label>
+          <label className="form-label" htmlFor="milestone-date">
+            When did it happen?
+          </label>
           <p className="form-help">
             Please enter a full date, even if you're not 100% sure.
           </p>
           <input
-            onChange={(e) => {
-              updateAddEventDate(e.target.value);
-            }}
+            id="milestone-date"
+            onChange={(event) => updateAddEventDate(event.target.value)}
             type="date"
+            min="1971-01-01"
+            required
             value={addEventDate}
           />
         </div>
 
-        {/* precise */}
         <div className="form-field form-field--checkbox form-field--checkbox-date">
           <label className="checkbox-container">
             This date isn't exact, but it's close!
             <input
               type="checkbox"
-              onChange={(e) => {
-                updateAddEventPrecise(e.target.checked);
-              }}
+              onChange={(event) =>
+                updateAddEventPrecise(event.target.checked)
+              }
               checked={addEventPrecise}
             />
             <span className="checkmark" />
@@ -129,94 +141,67 @@ export default function AddMilestoneForm({
         </div>
       </div>
 
-      {/* actually submits the date */}
-      <div className="form-field hide">
-        <label className="form-label">date</label>
-        <input
-          readOnly
-          type="text"
-          name="entry.1572580151"
-          value={`${addEventDate.split("-")[1]}/${addEventDate.split("-")[2]}/${
-            addEventDate.split("-")[0]
-          }`}
-        />
-      </div>
-
-      {/* actually submits precise */}
-      <div className="form-field hide">
-        <label className="form-label">precise</label>
-        <input
-          readOnly
-          type="text"
-          name="entry.818650547"
-          value={addEventPrecise ? "N" : "Y"}
-        />
-      </div>
-
-      {/* event */}
       <div className="form-field">
-        <label className="form-label">What happened?</label>
+        <label className="form-label" htmlFor="milestone-description">
+          What happened?
+        </label>
         <p className="form-help">
           This will be the milestone description. Everything you include will be
           visible on the timeline!
         </p>
         <textarea
-          onChange={(e) => {
-            updateAddEventDesc(e.target.value);
-          }}
+          id="milestone-description"
+          onChange={(event) => updateAddEventDesc(event.target.value)}
           value={addEventDesc}
-          name="entry.2083246933"
+          required
+          maxLength="500"
         />
       </div>
 
-      {/* people */}
-      <p className="form-label">Who was involved?</p>
-      <div className="form-field--checkbox-wrap">
-        {addEventCheckboxes}
-        {/* {checkboxesForPeopleInAddMilestone} */}
-      </div>
+      <fieldset className="form-fieldset">
+        <legend className="form-label">Who was involved?</legend>
+        <div className="form-field--checkbox-wrap">{addEventCheckboxes}</div>
+      </fieldset>
 
       <div className="form-field">
-        <label className="form-label">Anyone else?</label>
+        <label className="form-label" htmlFor="milestone-other-people">
+          Anyone else?
+        </label>
         <p className="form-help">Separate each name by a comma.</p>
         <input
-          onChange={(e) => {
-            updateAddEventOtherPeople(e.target.value);
-          }}
+          id="milestone-other-people"
+          onChange={(event) => updateAddEventOtherPeople(event.target.value)}
           value={addEventOtherPeople}
           type="text"
         />
       </div>
 
-      {/* hidden field submitting all people */}
-      <div className="form-field hide">
-        <label className="form-label">people</label>
-        <input
-          readOnly
-          value={createStringOfAllPeopleInAddEvent()}
-          name="entry.210962264"
-          type="text"
-        />
-      </div>
-
       <div className="form-flex">
-        {/* name */}
         <div className="form-field">
-          <label className="form-label">Your name</label>
-          <input name="entry.2022364556" type="text" />
+          <label className="form-label" htmlFor="milestone-contributor-name">
+            Your name
+          </label>
+          <input
+            id="milestone-contributor-name"
+            value={contributorName}
+            maxLength="80"
+            onChange={(event) => setContributorName(event.target.value)}
+            type="text"
+            autoComplete="name"
+          />
         </div>
-        {/* email */}
         <div className="form-field">
-          <label className="form-label">Your email</label>
-          <input name="entry.2051201691" type="email" />
-        </div>
-      </div>
-
-      {/* hide */}
-      <div className="hide">
-        <div className="form-field">
-          <label>hide</label>
-          <input readOnly value="N" type="text" name="entry.1603008717" />
+          <label className="form-label" htmlFor="milestone-contributor-email">
+            Your email
+          </label>
+          <input
+            id="milestone-contributor-email"
+            value={contributorEmail}
+            maxLength="254"
+            onChange={(event) => setContributorEmail(event.target.value)}
+            type="email"
+            autoComplete="email"
+          />
         </div>
       </div>
 
@@ -224,7 +209,44 @@ export default function AddMilestoneForm({
         Once you submit, your milestone will be immediately added to the
         timeline. Make sure it looks good!!!
       </p>
-      <input type="submit" value="Submit" />
+
+      {submissionConfig.available && (
+        <TurnstileWidget
+          siteKey={submissionConfig.siteKey}
+          action="add_milestone"
+          onReady={(controller) => {
+            controllerRef.current = controller;
+            setVerificationReady(Boolean(controller));
+          }}
+          onToken={(token) =>
+            flow.acceptToken(token, controllerRef.current)
+          }
+          onFailure={(message) =>
+            flow.failChallenge(message, controllerRef.current)
+          }
+        />
+      )}
+
+      {flow.busy && (
+        <p className="form-status" role="status">
+          Verifying and sending your milestone…
+        </p>
+      )}
+      {flow.error && (
+        <p className="form-alert" role="alert">
+          {flow.error}
+        </p>
+      )}
+
+      <button
+        className="form-submit"
+        type="submit"
+        disabled={
+          flow.busy || !submissionConfig.available || !verificationReady
+        }
+      >
+        {flow.busy ? "Submitting…" : "Submit milestone"}
+      </button>
     </form>
   );
 }

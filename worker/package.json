@@ -1,0 +1,14 @@
+{
+  "name": "baller-express-submission-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "audit:staging-sheets": "node scripts/audit-staging-sheets.mjs",
+    "check": "node --check src/*.js && node --check src/adapters/*.js && node --check src/alerts/*.js && node --check scripts/*.mjs",
+    "test": "node --test test/*.test.js"
+  }
+}

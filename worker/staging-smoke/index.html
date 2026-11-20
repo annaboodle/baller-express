@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Baller Express staging smoke test</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+    <script
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&amp;render=explicit"
+      defer
+    ></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Local staging tool</p>
+        <h1>Baller Express submission smoke test</h1>
+        <p>
+          This page sends fictional data only to the staging Worker. It is not
+          the website and does not change the production forms.
+        </p>
+        <p id="startup-status" class="status" role="status">Preparing…</p>
+      </header>
+
+      <section class="card">
+        <h2>New milestone</h2>
+        <form id="milestone-form">
+          <label>
+            Type
+            <select name="type">
+              <option value="event">Event</option>
+              <option value="intro">Introduction</option>
+              <option value="move">Move</option>
+              <option value="trip">Trip</option>
+            </select>
+          </label>
+          <label>
+            Date
+            <input name="date" type="date" value="2025-06-15" required />
+          </label>
+          <label class="check">
+            <input name="approximate" type="checkbox" /> Approximate date
+          </label>
+          <label class="wide">
+            Description
+            <input name="description" maxlength="500" required />
+          </label>
+          <label class="wide">
+            People (comma-separated)
+            <input name="people" value="Staging Alex, Staging Jordan" required />
+          </label>
+          <label>
+            Contributor name (optional)
+            <input name="contributorName" value="Fictional Tester" maxlength="80" />
+          </label>
+          <label>
+            Contributor email (optional)
+            <input
+              name="contributorEmail"
+              type="email"
+              value="fictional@example.invalid"
+            />
+          </label>
+          <div id="milestone-turnstile" class="turnstile wide"></div>
+          <button id="milestone-submit" class="primary wide" type="submit" disabled>
+            Verify and submit milestone
+          </button>
+          <p id="milestone-status" class="status wide" role="status"></p>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Edit proposal</h2>
+        <form id="edit-form">
+          <label>
+            Existing event ID
+            <input name="eventId" value="stg_evt_0001" required />
+          </label>
+          <label>
+            Original date
+            <input name="originalDate" type="date" value="2024-05-18" required />
+          </label>
+          <label class="wide">
+            Original description
+            <input
+              name="originalDescription"
+              value="Alex and Jordan met at a picnic"
+              maxlength="500"
+              required
+            />
+          </label>
+          <label class="wide">
+            Original people (comma-separated)
+            <input name="originalPeople" value="Alex, Jordan" required />
+          </label>
+          <fieldset class="wide">
+            <legend>Fields to change</legend>
+            <label class="check"><input name="fields" type="checkbox" value="date" checked /> Date</label>
+            <label class="check"><input name="fields" type="checkbox" value="description" checked /> Description</label>
+            <label class="check"><input name="fields" type="checkbox" value="people" /> People</label>
+          </fieldset>
+          <label class="wide">
+            Requested change
+            <textarea name="requestedChange" maxlength="1000" required>Move the fictional date to May 19 and clarify that it was a neighborhood picnic.</textarea>
+          </label>
+          <label>
+            Contributor name (optional)
+            <input name="contributorName" value="Fictional Reviewer" maxlength="80" />
+          </label>
+          <label>
+            Contributor email (optional)
+            <input
+              name="contributorEmail"
+              type="email"
+              value="reviewer@example.invalid"
+            />
+          </label>
+          <div id="edit-turnstile" class="turnstile wide"></div>
+          <button id="edit-submit" class="primary wide" type="submit" disabled>
+            Verify and submit proposal
+          </button>
+          <p id="edit-status" class="status wide" role="status"></p>
+        </form>
+      </section>
+
+      <section class="card replay-card">
+        <h2>Idempotency checks</h2>
+        <p>
+          After one successful creation, replay the identical request or send
+          the same request ID with changed content. These checks happen before
+          Turnstile, so they do not reuse a verification token.
+        </p>
+        <div class="button-row">
+          <button id="replay-button" type="button" disabled>Replay last success</button>
+          <button id="conflict-button" type="button" disabled>
+            Conflict last request ID
+          </button>
+        </div>
+        <p id="idempotency-status" class="status" role="status"></p>
+      </section>
+
+      <section class="card response-card">
+        <h2>Latest safe response</h2>
+        <pre id="response-output" aria-live="polite">No request sent yet.</pre>
+      </section>
+    </main>
+  </body>
+</html>
