@@ -23,9 +23,7 @@
     "check:frontend": "npm run test:ci && npm run build",
     "check:worker": "npm --prefix worker run check && npm --prefix worker test",
     "check": "npm run check:frontend && npm run check:worker",
-    "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -41,9 +39,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "gh-pages": "^2.2.0"
   },
   "homepage": "https://ballerexpress.com"
 }

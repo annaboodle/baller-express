@@ -32,10 +32,9 @@ group: introductions, moves, trips, weddings, babies, and other events.
   If a technical requirement appears to need a user-visible change, show the
   proposed wording or layout to the owner and wait for approval before editing.
 
-## Current implementation
+## Legacy implementation before cutover
 
-This section describes production as it exists before the submission-security
-project is deployed.
+This section describes the legacy site. For release status see **Production cutover** below.
 
 - The frontend is Create React App with React 16 and is hosted on GitHub Pages.
 - Source lives on `master`; the live site is served from the root of the
@@ -252,7 +251,7 @@ workbook. The production Worker is deployed with submissions disabled. Its
 two submission routes returned 503 and the signed alert poll reached D1.
 All six application tables were empty after verification.
 
-The manual Pages workflow is on the feature branch. The GitHub production
+The manual Pages workflow was included in PR #5. The GitHub production
 environment requires the owner, restricts deployments to master, and disables
 admin bypass. The production notification code is saved in the bound project.
 The owner configured the four Script Properties, authorized the notifier, and
@@ -262,6 +261,17 @@ The owner authorized the controlled cutover that day. Fresh private exports
 reproduced all 210 approved rows and IDs. The owner confirmed no new submissions
 or edits. Closing the legacy Forms awaits final confirmation after smoke tests.
 See the Stage 5 section in `docs/submissions.md`.
+
+## Production cutover
+
+On 2026-11-20, PR #5 merged into protected `master` at `8c8cbcd`. The
+signed-out production CSV matched all 210 approved milestones and seven public
+columns. Both private tab IDs returned HTTP 401. The owner approved verification
+run `44820111131`, which passed. Pages now uses GitHub Actions with the existing
+custom domain and enforced HTTPS. Owner-approved run `44820616564` published
+the live release. The live timeline rendered all 210 migrated milestones.
+The production Worker has submissions enabled. The legacy Forms and feeds
+await the owner's final retirement confirmation after submission testing.
 
 ## Approved target architecture
 
@@ -359,13 +369,11 @@ silently start paid usage.
 - Local development uses staging/test resources only. It must not write to the
   production workbook or modify the current Forms.
 - Merging source to `master` must not deploy production.
-- Production deployment will be a manually triggered GitHub Actions workflow
+- Production deployment uses a manually triggered GitHub Actions workflow
   that rebuilds protected `master`, reruns checks, and pauses for explicit
   environment approval.
-- Remove or disable laptop-driven `npm run deploy` after the replacement
-  deployment workflow is verified.
-- Do not change the GitHub Pages source or `gh-pages` deployment behavior until
-  the manual replacement workflow is ready and the cutover is approved.
+- Use **Production Pages** for releases. Preserve the legacy `gh-pages` branch
+  as the pre-cutover display snapshot.
 - The owner accepts a brief interruption to the public timeline during an
   approved production cutover if it simplifies the switch. See the production
   cutover checklist in `docs/submissions.md`.
@@ -421,5 +429,5 @@ verification.
   generated.
 - Required GitHub status checks cannot be selected until the corresponding
   workflow jobs have run at least once.
-- `master` and `gh-pages` are separate safety boundaries: merging source is not
-  deployment, while updating `gh-pages` changes the live site.
+- A source merge and a live release are separate operations. The production
+  reviewer approves each release of the artifact built from protected `master`.

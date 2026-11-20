@@ -5,11 +5,10 @@ friend group. The production site is hosted on GitHub Pages.
 
 ## Production safety
 
-Source development happens on `codex/protected-submissions`. Production is
-served from the separate `gh-pages` branch, and merging source does not deploy
-the site.
+Source development happens on `codex/protected-submissions`. Releases use the
+manual **Production Pages** workflow on protected `master`.
 
-Do not run `npm run deploy`, modify `gh-pages`, change GitHub Pages settings, or
+Do not modify the legacy `gh-pages` branch, change GitHub Pages settings, or
 point local code at writable production resources during development. See
 [`AGENTS.md`](AGENTS.md) and
 [`docs/submissions.md`](docs/submissions.md) before making changes.
@@ -72,7 +71,8 @@ files are ignored by Git.
 
 ## Deployment
 
-The repository still contains the legacy laptop-driven `npm run deploy`
-command because production has not been cut over. It is documented for
-historical accuracy, not approved for feature development. A protected,
-manual-only replacement is planned for a later explicitly authorized stage.
+Under **Actions → Production Pages → Run workflow**, choose `master`. The
+default run builds the site, runs the tests, and exercises the owner's approval
+step. Select **Publish the verified build to the live site** for a release.
+GitHub checks the public feed, waits for the owner's production approval, and
+publishes the artifact after confirming the reviewed commit is still current.
