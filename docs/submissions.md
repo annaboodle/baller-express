@@ -627,12 +627,9 @@ in two seconds. The owner confirmed `consecutiveFailures` was zero in
 
 The manual Production Pages workflow defaults to a verification-only run.
 GitHub requires owner review of the production environment, allows only the
-master branch, and disables admin bypass. Two public repository variables
-supply the Worker origin and Turnstile site key. Set PRODUCTION_TIMELINE_CSV
-to the signed-out-verified, single generated tab when publication is approved.
-A publication run checks the feed schema and current master revision. The
-workflow can first be dispatched after reaching the default branch. Pages
-still serves the legacy gh-pages branch.
+master branch, and disables admin bypass. Three public repository variables
+supply the Worker origin, Turnstile site key, and published CSV for the single
+generated tab. A publication run checks the feed schema and current master revision.
 
 ### Stage 6: controlled cutover
 
@@ -740,6 +737,12 @@ Sheets and both published feeds reproduced the approved 210 rows, their IDs,
 and the archived count of 130 edit responses. Source and Pages rollback SHAs
 are saved with the private cutover snapshot. The populated production workbook
 already matches these rows.
+
+PR #5 merged at `8c8cbcd`. The signed-out CSV matched all seven columns and
+210 milestones. Requests for both private tab IDs returned HTTP 401. The owner
+approved the verification-only Actions run `44820111131`, which passed. Pages
+was switched to GitHub Actions with the existing custom domain and HTTPS
+settings. The first publication run is `44820616564`.
 
 The owner accepts a brief interruption to the public timeline if it makes the
 switch simpler. Back up the data, record rollback revisions, and test the Worker
