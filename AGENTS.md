@@ -268,7 +268,10 @@ On 2026-11-20, PR #5 merged into protected `master` at `8c8cbcd`. The
 signed-out production CSV matched all 210 approved milestones and seven public
 columns. Both private tab IDs returned HTTP 401. The owner approved verification
 run `44820111131`, which passed. Pages now uses GitHub Actions with the existing
-custom domain and enforced HTTPS. The first live release is run `44820616564`.
+custom domain and enforced HTTPS. Owner-approved run `44820616564` published
+the live release. The live timeline rendered all 210 migrated milestones.
+The production Worker has submissions enabled. The legacy Forms and feeds
+await the owner's final retirement confirmation after submission testing.
 
 ## Approved target architecture
 

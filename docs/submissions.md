@@ -742,7 +742,10 @@ PR #5 merged at `8c8cbcd`. The signed-out CSV matched all seven columns and
 210 milestones. Requests for both private tab IDs returned HTTP 401. The owner
 approved the verification-only Actions run `44820111131`, which passed. Pages
 was switched to GitHub Actions with the existing custom domain and HTTPS
-settings. The first publication run is `44820616564`.
+settings. The owner approved publication run `44820616564`, which succeeded.
+The live site rendered 210 edit controls. The add form opened on desktop and the
+edit form fit a 390-pixel mobile viewport. The production Worker was enabled,
+and both submission routes returned HTTP 204 for the live site's CORS preflight.
 
 The owner accepts a brief interruption to the public timeline if it makes the
 switch simpler. Back up the data, record rollback revisions, and test the Worker
