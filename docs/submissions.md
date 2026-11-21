@@ -1,6 +1,6 @@
 # Submission security and deployment runbook
 
-Status: Stages 1–3 complete. Stage 4 rehearsal passed and awaits owner review.
+Production uses the protected submission flow. See **Production cutover** for the release and retirement checks.
 
 Last reviewed: 2026-11-20
 
@@ -19,9 +19,9 @@ Verified repository state on 2026-11-09:
   non-deploying pull-request workflow on the feature branch only.
 - `npm run deploy` is the only repository-provided production deployment path.
 
-## Current and target data flow
+## Data flow
 
-Current production:
+Before cutover:
 
 ```text
 Master spreadsheet CSV -----------+
@@ -31,7 +31,7 @@ Form response spreadsheet CSV ----+
 React forms --> public Google Forms endpoints --> response spreadsheets
 ```
 
-Proposed target:
+Current production:
 
 ```text
 React form + Turnstile token
@@ -48,7 +48,7 @@ Published Timeline (Generated) -- only published CSV --> React
 Edit form --> Worker --> Edit Proposals (private) --> owner email
 ```
 
-## Target workbook
+## Production workbook
 
 ### Timeline Source
 
@@ -747,11 +747,22 @@ The live site rendered 210 edit controls. The add form opened on desktop and the
 edit form fit a 390-pixel mobile viewport. The production Worker was enabled,
 and both submission routes returned HTTP 204 for the live site's CORS preflight.
 
+The first real milestone was accepted exactly once and appeared in the signed-out
+feed (211 rows). The first private proposal was marked SENT and the owner
+confirmed delivery. Both old Forms then showed the closed notice to signed-out
+visitors. The 188 archived milestone responses and 130 archived edit responses
+matched their cutover row counts and timestamps. There were no late responses to
+import. Both old published feed URLs returned HTTP 401. The owner also set
+general access to Restricted on the legacy master and milestone-response files.
+Signed-out direct exports of all three archives then returned HTTP 401.
+The live generated CSV still returned HTTP 200 with 211 unique milestones
+and exactly seven public columns.
+
 The owner accepts a brief interruption to the public timeline if it makes the
 switch simpler. Back up the data, record rollback revisions, and test the Worker
 in advance. If downtime helps, use it during the frontend switch, then check
-the new build at the usual public URL. Direct links to the old Google Forms
-can still accept responses while the timeline is offline.
+the new build at the usual public URL. Before the Forms were closed, their
+direct links could still accept responses during a site outage.
 
 1. Export backups of the current master, milestone-response, and edit-response
    Sheets.

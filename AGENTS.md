@@ -32,6 +32,10 @@ group: introductions, moves, trips, weddings, babies, and other events.
   If a technical requirement appears to need a user-visible change, show the
   proposed wording or layout to the owner and wait for approval before editing.
 
+## Current production
+
+GitHub Actions publishes the React site from protected `master` after owner approval. The site reads one seven-column generated CSV. Turnstile and the production Worker handle both forms. The old forms are closed. See **Production cutover** below for verification and the late-response reconciliation.
+
 ## Legacy implementation before cutover
 
 This section describes the legacy site. For release status see **Production cutover** below.
@@ -55,10 +59,7 @@ This section describes the legacy site. For release status see **Production cuto
 
 ## Stage 1 branch status
 
-Stage 1 was completed on 2026-11-11 on `codex/protected-submissions`. It is open
-as draft pull request [#5](https://github.com/annaboodle/baller-express/pull/5),
-is not deployed, and has not changed the production forms, Sheets, `master`,
-or `gh-pages`.
+Stage 1 was completed on 2026-11-11 in then-draft PR [#5](https://github.com/annaboodle/baller-express/pull/5), which merged during cutover.
 
 - `src/App.test.js` contains four project-specific baseline tests for feed
   merging/sorting, hidden rows, approximate dates, type/people filtering, and
@@ -186,9 +187,7 @@ Stage 3; the owner separately authorized Stage 3 on 2026-11-18.
 
 The owner approved the desktop and mobile review on 2026-11-20, completing
 Stage 3 and authorizing the Stage 4 staging migration rehearsal. The attended
-frontend-to-staging integration smoke passed on 2026-11-19. The frontend
-changes are on `codex/protected-submissions`; production still uses the legacy
-Forms and feeds.
+frontend-to-staging integration smoke passed on 2026-11-19, while production was still using the legacy Forms and feeds.
 The staging Worker remains disabled outside an attended review window.
 
 - `src/submissions.js` is the fail-closed browser configuration and API boundary.
@@ -247,7 +246,7 @@ backup and ID mapping procedure, and checks.
 The restricted production workbook matches all 210 approved source and generated
 rows. Its seven-column projection, three owner protections, and empty edit
 queue were verified. The separate production service account can read the
-workbook. The production Worker is deployed with submissions disabled. Its
+workbook. The production Worker was initially deployed with submissions disabled. Its
 two submission routes returned 503 and the signed alert poll reached D1.
 All six application tables were empty after verification.
 
@@ -259,7 +258,7 @@ verified one time-based `pollBallerExpressProduction` trigger. The manual
 poll completed with zero consecutive Worker polling failures on 2026-11-20.
 The owner authorized the controlled cutover that day. Fresh private exports
 reproduced all 210 approved rows and IDs. The owner confirmed no new submissions
-or edits. Closing the legacy Forms awaits final confirmation after smoke tests.
+or edits before the release.
 See the Stage 5 section in `docs/submissions.md`.
 
 ## Production cutover
@@ -270,19 +269,24 @@ columns. Both private tab IDs returned HTTP 401. The owner approved verification
 run `44820111131`, which passed. Pages now uses GitHub Actions with the existing
 custom domain and enforced HTTPS. Owner-approved run `44820616564` published
 the live release. The live timeline rendered all 210 migrated milestones.
-The production Worker has submissions enabled. The legacy Forms and feeds
-await the owner's final retirement confirmation after submission testing.
+The production Worker accepted the first real milestone exactly once, bringing the
+public count to 211. One private edit proposal triggered the email the owner
+confirmed receiving. After owner approval both old Forms were closed. The two
+legacy published CSVs returned HTTP 401. The old response archives matched the
+cutover snapshot (188 milestone responses and 130 edit responses). Signed-out
+direct exports of all three archives returned HTTP 401 after the sharing check.
+The live generated CSV returned HTTP 200 with 211 unique milestones.
 
-## Approved target architecture
+## Production architecture
 
-The target workbook has three tabs:
+The production workbook has three tabs:
 
 1. `Timeline Source` -- private canonical data edited by the owner and Worker.
 2. `Published Timeline (Generated)` -- protected, formula-generated, sanitized,
    and the only tab published to the web.
 3. `Edit Proposals` -- private manual-review queue with notification state.
 
-The target submission path is:
+Milestone submissions follow this path:
 
 `custom React form -> Cloudflare Turnstile -> Cloudflare Worker -> Timeline Source`
 
@@ -293,8 +297,7 @@ The target submission path is:
   owner-controlled `hide` value is not `Y`.
 - Edit proposals are written only to `Edit Proposals` and never auto-apply.
 - The website reads one CSV: `Published Timeline (Generated)`.
-- The old Google Forms are closed and old published Sheets are unpublished only
-  after the new production flow passes smoke tests.
+- Keep the old Google Forms closed and the legacy feeds unpublished.
 
 See `docs/submissions.md` for the complete design, staging, GitHub settings,
 cutover, and rollback checklist.
