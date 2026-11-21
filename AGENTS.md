@@ -273,7 +273,9 @@ The production Worker accepted the first real milestone exactly once, bringing t
 public count to 211. One private edit proposal triggered the email the owner
 confirmed receiving. After owner approval both old Forms were closed. The two
 legacy published CSVs returned HTTP 401. The old response archives matched the
-cutover snapshot (188 milestone responses and 130 edit responses).
+cutover snapshot (188 milestone responses and 130 edit responses). Signed-out
+direct exports of all three archives returned HTTP 401 after the sharing check.
+The live generated CSV returned HTTP 200 with 211 unique milestones.
 
 ## Production architecture
 

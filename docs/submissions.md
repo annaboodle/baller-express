@@ -752,9 +752,11 @@ feed (211 rows). The first private proposal was marked SENT and the owner
 confirmed delivery. Both old Forms then showed the closed notice to signed-out
 visitors. The 188 archived milestone responses and 130 archived edit responses
 matched their cutover row counts and timestamps. There were no late responses to
-import. Both old published feed URLs returned HTTP 401. Check each archive’s
-normal Drive sharing separately: a spreadsheet shared with anyone who has the
-link can still be exported directly after web publishing stops.
+import. Both old published feed URLs returned HTTP 401. The owner also set
+general access to Restricted on the legacy master and milestone-response files.
+Signed-out direct exports of all three archives then returned HTTP 401.
+The live generated CSV still returned HTTP 200 with 211 unique milestones
+and exactly seven public columns.
 
 The owner accepts a brief interruption to the public timeline if it makes the
 switch simpler. Back up the data, record rollback revisions, and test the Worker
